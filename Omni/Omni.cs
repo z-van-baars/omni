@@ -16,6 +16,9 @@ namespace Omni
         private Texture2D laborer;
         private Texture2D tree;
         private Texture2D lumber_camp;
+        private GameTile[,] game_tiles;
+        public int MapWidth = 20;
+        public int MapHeight = 20;
 
         public Omni()
         {
@@ -34,8 +37,22 @@ namespace Omni
         /// </summary>
         protected override void Initialize()
         {
-            // TODO: Add your initialization logic here
+            // TODO: Add your initialization logic  
 
+            for (int y = 1; y <= MapHeight; y++)
+            {                
+                for (int x = 1; x <= MapWidth; x++)
+                {
+                    GameTile gameTile = new GameTile(x, y, "Grass");
+                    game_tiles[y, x] = gameTile;
+                }
+            }
+            game_tiles[0, 0].terrain = "Tree";
+
+            foreach (GameTile tile_object in game_tiles)
+            {
+                /// add the tile to a list of tiles for drawing porpoises
+            }
             base.Initialize();
         }
 
@@ -89,9 +106,11 @@ namespace Omni
 
             spriteBatch.Begin();
             spriteBatch.Draw(grass_tile, new Vector2(400, 240), Color.White);
-            spriteBatch.Draw(tree, new Vector2(400, 240), Color.White);
-            spriteBatch.Draw(lumber_camp, new Vector2(400, 240), Color.White);
-            spriteBatch.Draw(laborer, new Vector2(400, 240), Color.White);
+            spriteBatch.Draw(grass_tile, new Vector2(420, 250), Color.White);
+            spriteBatch.Draw(grass_tile, new Vector2(420, 230), Color.White);
+            spriteBatch.Draw(tree, new Vector2(400, 180), Color.White);
+            spriteBatch.Draw(lumber_camp, new Vector2(420, 190), Color.White);
+            spriteBatch.Draw(laborer, new Vector2(420, 170), Color.White);
             spriteBatch.End();
 
             // TODO: Add your drawing code here
