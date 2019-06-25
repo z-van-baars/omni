@@ -1,6 +1,8 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using System;
+using System.Collections.Generic;
 
 namespace Omni
 {
@@ -18,14 +20,17 @@ namespace Omni
         private Texture2D tree;
         private Texture2D lumber_camp;
         private GameTile[,] game_tiles;
+        private List<Tree> trees = new List<Tree>();
 
-        
+
         public int MapWidth = 50;
         public int MapHeight = 50;
         public int TileWidth = 40;
         public int TileHeight = 20;
         public int ShiftX;
         public int ShiftY;
+
+
 
         public Omni()
         {
@@ -57,11 +62,14 @@ namespace Omni
                     game_tiles[y, x] = gameTile;
                 }
             }
-            game_tiles[0, 0].terrain = "Tree";
-
-            foreach (GameTile tile_object in game_tiles)
+            Random random = new Random();
+            int num_trees = random.Next(10, 100);
+            for (int t = 0; t < num_trees; t++)
             {
-                /// add the tile to a list of tiles for drawing porpoises
+                int rand_x = random.Next(0, MapWidth - 1);
+                int rand_y = random.Next(0, MapHeight - 1);
+                Tree newTree = new Tree(rand_x, rand_y);
+                trees.Add(newTree);
             }
             base.Initialize();
         }
@@ -131,9 +139,13 @@ namespace Omni
                 spriteBatch.Draw(grass_tile, new Vector2(x2 + ShiftX, y2 + ShiftY), Color.White);
             }
 
-            int x3 = coordinateConverter.MapToScreenX(0, 0);
-            int y3 = coordinateConverter.MapToScreenY(0, 0);
-            spriteBatch.Draw(tree, new Vector2(x3 + ShiftX, y3 + ShiftY - 60), Color.White);
+            foreach (Tree treeObject in trees)
+            {
+                int x3 = coordinateConverter.MapToScreenX(treeObject.x, treeObject.y);
+                int y3 = coordinateConverter.MapToScreenY(treeObject.x, treeObject.y);
+                spriteBatch.Draw(tree, new Vector2(x3 + ShiftX, y3 + ShiftY - 60), Color.White);
+            }
+
             int x4 = coordinateConverter.MapToScreenX(49, 49);
             int y4 = coordinateConverter.MapToScreenY(49, 49);
             spriteBatch.Draw(lumber_camp, new Vector2(x4 + ShiftX, y4 + ShiftY - 60), Color.White);

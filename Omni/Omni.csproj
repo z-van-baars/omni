@@ -42,12 +42,14 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="CoordinateConverter.cs" />
+    <Compile Include="Entity.cs" />
     <Compile Include="Omni.cs" />
     <Compile Include="GameMap.cs" />
     <Compile Include="GameState.cs" />
     <Compile Include="GameTile.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Tree.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="MonoGame.Framework">
