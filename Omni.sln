@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.705
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Omni", "Omni\Omni.csproj", "{CEB5B846-71AD-4C7A-A52C-F15A23BE4487}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x86 = Debug|x86
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CEB5B846-71AD-4C7A-A52C-F15A23BE4487}.Debug|x86.ActiveCfg = Debug|x86
+		{CEB5B846-71AD-4C7A-A52C-F15A23BE4487}.Debug|x86.Build.0 = Debug|x86
+		{CEB5B846-71AD-4C7A-A52C-F15A23BE4487}.Release|x86.ActiveCfg = Release|x86
+		{CEB5B846-71AD-4C7A-A52C-F15A23BE4487}.Release|x86.Build.0 = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {1003B53A-EF6C-48E2-AE98-78F49D33C680}
+	EndGlobalSection
+EndGlobal
