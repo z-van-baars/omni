@@ -9,9 +9,10 @@ namespace Omni
 {
     class GameTile
     {
-        private int x;
-        private int y;
-        private string biome;
+        public int x;
+        public int y;
+        public string biome;
+        public string terrain;
 
         public GameTile(int x, int y, string biome)
         {

@@ -12,13 +12,20 @@ namespace Omni
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
 
+        private CoordinateConverter coordinateConverter;
         private Texture2D grass_tile;
         private Texture2D laborer;
         private Texture2D tree;
         private Texture2D lumber_camp;
         private GameTile[,] game_tiles;
-        public int MapWidth = 20;
-        public int MapHeight = 20;
+
+        
+        public int MapWidth = 50;
+        public int MapHeight = 50;
+        public int TileWidth = 40;
+        public int TileHeight = 20;
+        public int ShiftX;
+        public int ShiftY;
 
         public Omni()
         {
@@ -37,11 +44,14 @@ namespace Omni
         /// </summary>
         protected override void Initialize()
         {
-            // TODO: Add your initialization logic  
-
-            for (int y = 1; y <= MapHeight; y++)
+            // TODO: Add your initialization logic
+            coordinateConverter = new CoordinateConverter(TileWidth, TileHeight);
+            this.IsMouseVisible = true;
+            ShiftX = TileWidth * (MapWidth / 2) - TileWidth / 2;
+            game_tiles = new GameTile[MapHeight, MapWidth];
+            for (int y = 0; y < MapHeight; y++)
             {                
-                for (int x = 1; x <= MapWidth; x++)
+                for (int x = 0; x < MapWidth; x++)
                 {
                     GameTile gameTile = new GameTile(x, y, "Grass");
                     game_tiles[y, x] = gameTile;
@@ -90,6 +100,15 @@ namespace Omni
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
+            KeyboardState KeyState = Keyboard.GetState();
+            if (KeyState.IsKeyDown(Keys.Right))
+                ShiftX -= 5;
+            if (KeyState.IsKeyDown(Keys.Left))
+                ShiftX += 5;
+            if (KeyState.IsKeyDown(Keys.Up))
+                ShiftY += 5;
+            if (KeyState.IsKeyDown(Keys.Down))
+                ShiftY -= 5;
 
             // TODO: Add your update logic here
 
@@ -105,12 +124,22 @@ namespace Omni
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
             spriteBatch.Begin();
-            spriteBatch.Draw(grass_tile, new Vector2(400, 240), Color.White);
-            spriteBatch.Draw(grass_tile, new Vector2(420, 250), Color.White);
-            spriteBatch.Draw(grass_tile, new Vector2(420, 230), Color.White);
-            spriteBatch.Draw(tree, new Vector2(400, 180), Color.White);
-            spriteBatch.Draw(lumber_camp, new Vector2(420, 190), Color.White);
-            spriteBatch.Draw(laborer, new Vector2(420, 170), Color.White);
+            foreach (GameTile tileObject in game_tiles)
+            {
+                int x2 = coordinateConverter.MapToScreenX(tileObject.x, tileObject.y);
+                int y2 = coordinateConverter.MapToScreenY(tileObject.x, tileObject.y);
+                spriteBatch.Draw(grass_tile, new Vector2(x2 + ShiftX, y2 + ShiftY), Color.White);
+            }
+
+            int x3 = coordinateConverter.MapToScreenX(0, 0);
+            int y3 = coordinateConverter.MapToScreenY(0, 0);
+            spriteBatch.Draw(tree, new Vector2(x3 + ShiftX, y3 + ShiftY - 60), Color.White);
+            int x4 = coordinateConverter.MapToScreenX(49, 49);
+            int y4 = coordinateConverter.MapToScreenY(49, 49);
+            spriteBatch.Draw(lumber_camp, new Vector2(x4 + ShiftX, y4 + ShiftY - 60), Color.White);
+            int x5 = coordinateConverter.MapToScreenX(25, 25);
+            int y5 = coordinateConverter.MapToScreenY(25, 25);
+            spriteBatch.Draw(laborer, new Vector2(x5 + ShiftX, y5 + ShiftY - 60), Color.White);
             spriteBatch.End();
 
             // TODO: Add your drawing code here

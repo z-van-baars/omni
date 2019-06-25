@@ -41,6 +41,7 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="CoordinateConverter.cs" />
     <Compile Include="Omni.cs" />
     <Compile Include="GameMap.cs" />
     <Compile Include="GameState.cs" />
