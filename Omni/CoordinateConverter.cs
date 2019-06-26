@@ -16,16 +16,11 @@ namespace Omni
             this.tileWidth = tileWidth;
             this.tileHeight = tileHeight;
         }
-        public int MapToScreenX(int x, int y)
+        public (int, int) MapToScreen(int x, int y)
         {
             int x2 = ((((x + 1) - (y + 1)) * (tileWidth / 2)) - (tileHeight / 2));
-
-            return x2;
-        }
-        public int MapToScreenY(int x, int y)
-        {
             int y2 = (((y + x) * (tileHeight / 2)));
-            return y2;
+            return (x2, y2);
         }
     }
 }

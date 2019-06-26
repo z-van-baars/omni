@@ -134,23 +134,19 @@ namespace Omni
             spriteBatch.Begin();
             foreach (GameTile tileObject in game_tiles)
             {
-                int x2 = coordinateConverter.MapToScreenX(tileObject.x, tileObject.y);
-                int y2 = coordinateConverter.MapToScreenY(tileObject.x, tileObject.y);
+                (int x2, int y2) = coordinateConverter.MapToScreen(tileObject.x, tileObject.y);
                 spriteBatch.Draw(grass_tile, new Vector2(x2 + ShiftX, y2 + ShiftY), Color.White);
             }
 
             foreach (Tree treeObject in trees)
             {
-                int x3 = coordinateConverter.MapToScreenX(treeObject.x, treeObject.y);
-                int y3 = coordinateConverter.MapToScreenY(treeObject.x, treeObject.y);
+                (int x3, int y3) = coordinateConverter.MapToScreen(treeObject.x, treeObject.y);
                 spriteBatch.Draw(tree, new Vector2(x3 + ShiftX, y3 + ShiftY - 60), Color.White);
             }
 
-            int x4 = coordinateConverter.MapToScreenX(49, 49);
-            int y4 = coordinateConverter.MapToScreenY(49, 49);
+            (int x4, int y4) = coordinateConverter.MapToScreen(49, 49);
             spriteBatch.Draw(lumber_camp, new Vector2(x4 + ShiftX, y4 + ShiftY - 60), Color.White);
-            int x5 = coordinateConverter.MapToScreenX(25, 25);
-            int y5 = coordinateConverter.MapToScreenY(25, 25);
+            (int x5, int y5) = coordinateConverter.MapToScreen(25, 25);
             spriteBatch.Draw(laborer, new Vector2(x5 + ShiftX, y5 + ShiftY - 60), Color.White);
             spriteBatch.End();
 
