@@ -7,10 +7,10 @@ using System.Threading.Tasks;
 
 namespace Omni
 {
-    class Tree : Entity
+    class Tree : Terrain
     {
 
-        public Tree(Vector2 coordinates) : base(coordinates)
+        public Tree(Vector2 coordinates) : base(coordinates, "Tree")
         {
         }
     }

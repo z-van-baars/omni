@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 
 namespace Omni
 {
-    class Building
+    class Player
     {
+        public float Wood = 0;
     }
 }
