@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Xna.Framework;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,15 +7,11 @@ using System.Threading.Tasks;
 
 namespace Omni
 {
-    class Tree
+    class Tree : Entity
     {
-        public int x;
-        public int y;
 
-        public Tree(int x, int y)
+        public Tree(Vector2 coordinates) : base(coordinates)
         {
-            this.x = x;
-            this.y = y;
         }
     }
 }

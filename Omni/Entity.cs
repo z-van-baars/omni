@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Xna.Framework;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,13 +9,19 @@ namespace Omni
 {
     class Entity
     {
-        public int x;
-        public int y;
+        protected Vector2 coordinates;
 
-        public Entity(int x, int y)
+        public Entity(Vector2 coordinates)
         {
-            this.x = x;
-            this.y = y;
+            this.coordinates = coordinates;
+        }
+        public float Get_X()
+        {
+            return coordinates.X;
+        }
+        public float Get_Y()
+        {
+            return coordinates.Y;
         }
     }
 }
