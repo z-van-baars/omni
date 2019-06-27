@@ -32,20 +32,36 @@ namespace Omni
             moveIncrement();
             if (moveCounter == 0)
             {
+                /// reset the move counter, and move IMMEDIATELY to the next position in the path
                 moveCounter = moveCounterBase;
                 coordinates = path[0];
-                path = path.GetRange(1, path.Count() - 1);
-                if (coordinates == target)
+                /// !Important Note!: this statement doesn't test if it has arrived at the target!
+                /// It only tests to see if the path list it was given by the pathfinder object
+                /// has any more steps in it!
+                if (path.Count() == 1)
                 {
                     path = null;
                 }
+                else
+                {
+                    path = path.GetRange(1, path.Count() - 1);
+                }
             }
         }
-        public void SetTarget(List<Terrain> targetsList)
+        public void SetTarget(List<Entity> targetsList)
         {
-            Random random = new Random();
-            Entity choice = targetsList[random.Next(targetsList.Count)];
-            target = new Vector2(choice.Get_X(), choice.Get_Y());
+            double closestDistance = 99999;
+            Entity closestChoice = new Entity(new Vector2());
+            foreach (Entity possibleChoice in targetsList)
+            {
+                double distanceToChoice = Math.Sqrt(Math.Abs(coordinates.X - possibleChoice.Get_X()) + Math.Abs(coordinates.Y - possibleChoice.Get_Y()));
+                if (distanceToChoice < closestDistance)
+                {
+                    closestDistance = distanceToChoice;
+                    closestChoice = possibleChoice;
+                }
+            }
+            target = new Vector2(closestChoice.Get_X(), closestChoice.Get_Y());
         }
         public Vector2? GetTarget()
         {
@@ -55,6 +71,10 @@ namespace Omni
         {
             path = Path;
         }
+        public List<Vector2> GetPath()
+        {
+            return path;
+        }
         public void Tick(GameMap gameMap)
         {
             if (target.HasValue)
@@ -63,10 +83,15 @@ namespace Omni
                 {
                     move();
                 }
+
                 else if (gameMap.GetValidNeighbors(coordinates).Contains(target.Value))
                 {
                     target = null;
                 }
+            }
+            else
+            {
+                SetTarget(gameMap.GetTerrain());
             }
         }
     }

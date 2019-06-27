@@ -9,12 +9,20 @@ namespace Omni
 {
     class GameMap
     {
+
+        private List<Entity> entities = new List<Entity>();
+        private List<Terrain> terrain = new List<Terrain>();
+        private List<Building> buildings = new List<Building>();
+        private List<Unit> units = new List<Unit>();
+
         public Point MapDimensions;
         public GameTile[,] game_tiles;
 
         public GameMap(Point MapDimensions)
         {
             this.MapDimensions = MapDimensions;
+
+
         }
         public void GenerateMapArray()
         {
@@ -26,6 +34,29 @@ namespace Omni
                     GameTile gameTile = new GameTile(x, y, "Grass");
                     game_tiles[y, x] = gameTile;
                 }
+            }
+        }
+        public void PrimitiveMapGen()
+        {
+            Random random = new Random();
+            int num_trees = random.Next(100, 110);
+            for (int t = 0; t < num_trees; t++)
+            {
+                int tries = 0;
+                int rand_x = random.Next(0, MapDimensions.X - 1);
+                int rand_y = random.Next(0, MapDimensions.Y - 1);
+
+                while (game_tiles[rand_y, rand_x].Terrain != null)
+                {
+                    rand_x = random.Next(0, MapDimensions.X - 1);
+                    rand_y = random.Next(0, MapDimensions.Y - 1);
+                    tries += 1;
+                }
+                Tree newTree = new Tree(new Vector2(rand_x, rand_y));
+
+                terrain.Add(newTree);
+                game_tiles[rand_y, rand_x].Terrain = newTree;
+
             }
         }
         public bool IsPointInside(Vector2 mapCoordinates)
@@ -64,6 +95,18 @@ namespace Omni
                 }
             }
             return validNeighbors;
+        }
+        public List<Terrain> GetTerrain()
+        {
+            return terrain;
+        }
+        public List<Building> GetBuildings()
+        {
+            return buildings;
+        }
+        public List<Unit> GetUnits()
+        {
+            return units;
         }
     }
 }

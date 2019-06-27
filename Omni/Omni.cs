@@ -24,12 +24,10 @@ namespace Omni
         private Texture2D tree;
         private Texture2D lumber_camp;
         private Texture2D white_selection_box;
+        private Texture2D red_selection_box;
 
         private GameMap gameMap;
-        private List<Entity> entities = new List<Entity>();
-        private List<Terrain> terrain = new List<Terrain>();
-        private List<Building> buildings = new List<Building>();
-        private List<Unit> units = new List<Unit>();
+
         private Player Player1;
 
 
@@ -77,28 +75,8 @@ namespace Omni
             gameMap = new GameMap(MapDimensions);
             gameMap.GenerateMapArray();
             pathfinder = new Pathfinder(gameMap);
+            gameMap.PrimitiveMapGen();
 
-
-            Random random = new Random();
-            int num_trees = random.Next(100, 110);
-            for (int t = 0; t < num_trees; t++)
-            {
-                int tries = 0;
-                int rand_x = random.Next(0, MapDimensions.X - 1);
-                int rand_y = random.Next(0, MapDimensions.Y - 1);
-
-                while (gameMap.game_tiles[rand_y, rand_x].Terrain != null)
-                {
-                    rand_x = random.Next(0, MapDimensions.X - 1);
-                    rand_y = random.Next(0, MapDimensions.Y - 1);
-                    tries += 1;
-                }
-                Tree newTree = new Tree(new Vector2(rand_x, rand_y));
-
-                terrain.Add(newTree);
-                gameMap.game_tiles[rand_y, rand_x].Terrain = newTree;
-
-            }
             base.Initialize();
         }
 
@@ -111,6 +89,7 @@ namespace Omni
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
             white_selection_box = Content.Load<Texture2D>("art/ui/white_sb");
+            red_selection_box = Content.Load<Texture2D>("art/ui/red_sb");
             grass_tile = Content.Load<Texture2D>("art/tiles/grass_1");
             laborer = Content.Load<Texture2D>("art/units/laborer");
             tree = Content.Load<Texture2D>("art/terrain/tree_1");
@@ -177,7 +156,7 @@ namespace Omni
                 {
                     LumberCamp newLumberCamp = new LumberCamp(mapCoords);
                     gameMap.game_tiles[(int)mapCoords.Y, (int)mapCoords.X].Building = newLumberCamp;
-                    buildings.Add(newLumberCamp);
+                    gameMap.GetBuildings().Add(newLumberCamp);
                     List<Vector2> validNeighbors = gameMap.GetValidNeighbors(mapCoords);
                     List<Vector2> spawnableNeighbors = new List<Vector2>();
                     foreach (Vector2 validNeighbor in validNeighbors)
@@ -191,10 +170,10 @@ namespace Omni
                     {
                         Vector2 spawnTile = spawnableNeighbors[random.Next(spawnableNeighbors.Count)];
                         Laborer newLaborer = new Laborer(spawnTile);
-                        units.Add(newLaborer);
+                        gameMap.GetUnits().Add(newLaborer);
                         GameTile theTile = gameMap.game_tiles[(int)spawnTile.Y, (int)spawnTile.X];
                         theTile.Units.Add(newLaborer);
-                        newLaborer.SetTarget(terrain);
+                        newLaborer.SetTarget(gameMap.GetTerrain());
                         List<Vector2> newPath = pathfinder.GetPath(spawnTile, newLaborer.GetTarget().Value);
                         newLaborer.SetPath(newPath);
 
@@ -204,7 +183,7 @@ namespace Omni
                 
             }
 
-            foreach (Unit unitObject in units)
+            foreach (Unit unitObject in gameMap.GetUnits())
             {
                 unitObject.Tick(gameMap);
             }
@@ -227,7 +206,7 @@ namespace Omni
             /// draw all the gametiles - individual draw operations, not (yet) batched, and not collated into a single layer draw op
             foreach (GameTile tileObject in gameMap.game_tiles)
             {
-                (float tiX, float tiY) = coordinateConverter.MapToScreen(tileObject.x, tileObject.y);
+                (float tiX, float tiY) = coordinateConverter.MapToScreen(tileObject.X, tileObject.Y);
                 spriteBatch.Draw(grass_tile, new Vector2(tiX + DisplayShift.X, tiY + DisplayShift.Y), Color.White);
             }
             /// draw the selected tile graphic if the selected tile is within the map bounds
@@ -237,8 +216,19 @@ namespace Omni
                 Vector2 selectedTilePosition = new Vector2(stx, sty);
                 spriteBatch.Draw(white_selection_box, new Vector2(selectedTilePosition.X + DisplayShift.X, selectedTilePosition.Y + DisplayShift.Y), Color.White);
             }
+            foreach (Unit unitObject in gameMap.GetUnits())
+            {
+                if (unitObject.GetPath() != null)
+                {
+                    foreach (Vector2 pathStep in unitObject.GetPath())
+                    {
+                        (float rbx, float rby) = coordinateConverter.MapToScreen(pathStep.X, pathStep.Y);
+                        spriteBatch.Draw(red_selection_box, new Vector2(rbx + DisplayShift.X, rby + DisplayShift.Y), Color.White);
+                    }
+                }
+            }
             /// draw the terrain objects next, resources, trees, rocks, etc
-            foreach (Terrain terrainObject in terrain)
+            foreach (Terrain terrainObject in gameMap.GetTerrain())
             {
                 int imageFileHeightOffset = (int)(imageGraphics[terrainObject.name].Height - TileDimensions.Y);
                 (float teX, float teY) = coordinateConverter.MapToScreen(terrainObject.Get_X(), terrainObject.Get_Y());
@@ -246,14 +236,14 @@ namespace Omni
                     new Vector2(teX + DisplayShift.X, teY + DisplayShift.Y - (imageFileHeightOffset)), Color.White);
             }
             /// draw buildings
-            foreach (Building buildingObject in buildings)
+            foreach (Building buildingObject in gameMap.GetBuildings())
             {
                 int imageFileHeightOffset = (int)(imageGraphics[buildingObject.name].Height - TileDimensions.Y);
                 (float bX, float bY) = coordinateConverter.MapToScreen(buildingObject.Get_X(), buildingObject.Get_Y());
                 spriteBatch.Draw(imageGraphics[buildingObject.name], new Vector2(bX + DisplayShift.X, bY + DisplayShift.Y - imageFileHeightOffset), Color.White);
             }
             /// draw (moving) units
-            foreach (Unit unitObject in units)
+            foreach (Unit unitObject in gameMap.GetUnits())
             {
                 int imageFileHeightOffset = (int)(imageGraphics[unitObject.name].Height - TileDimensions.Y);
                 (float x5, float y5) = coordinateConverter.MapToScreen(unitObject.Get_X(), unitObject.Get_Y());

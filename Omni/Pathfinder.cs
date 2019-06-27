@@ -84,7 +84,8 @@ namespace Omni
                         && (tileObject.Terrain == null || tileObject.Terrain.pathable == true))
                     {
                         double tileModifier = 1.0;
-                        double newCost = costSoFar[currentTile] + tileModifier;
+                        double distanceFromTarget = Math.Sqrt(Math.Abs(tileObject.X - target.X) + Math.Abs(tileObject.Y - target.Y));
+                        double newCost = (costSoFar[currentTile] + tileModifier) + distanceFromTarget;
                         if (!cameFrom.ContainsKey(neighborTile) || newCost < costSoFar[currentTile])
                         {
                             cameFrom[neighborTile] = currentTile;
@@ -114,10 +115,10 @@ namespace Omni
                 {
                     frontier.Enqueue(start, 0);
                 }
-                closestTile = exploreFrontier(
-                    frontier, target, cameFrom, costSoFar);
-            }
 
+            }
+            closestTile = exploreFrontier(
+                frontier, target, cameFrom, costSoFar);
             List<Vector2> newPathSteps = new List<Vector2>();
             newPathSteps.Add(closestTile);
 

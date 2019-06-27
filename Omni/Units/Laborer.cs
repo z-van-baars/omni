@@ -10,7 +10,7 @@ namespace Omni.Units
     class Laborer : Unit
     {
 
-        public Laborer(Vector2 coordinates) : base(coordinates, "Laborer", 30)
+        public Laborer(Vector2 coordinates) : base(coordinates, "Laborer", 3)
         {
         }
     }

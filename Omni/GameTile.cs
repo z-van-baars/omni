@@ -9,17 +9,17 @@ namespace Omni
 {
     class GameTile
     {
-        public int x;
-        public int y;
+        public int X;
+        public int Y;
         public string Biome;
         public List<Unit> Units = new List<Unit>();
         public Terrain Terrain;
         public Building Building;
 
-        public GameTile(int x, int y, string Biome)
+        public GameTile(int X, int Y, string Biome)
         {
-            this.x = x;
-            this.y = y;
+            this.X = X;
+            this.Y = Y;
             this.Biome = Biome;
         }
         public bool IsPathable()
