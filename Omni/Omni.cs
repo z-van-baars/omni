@@ -25,6 +25,8 @@ namespace Omni
         private Texture2D lumber_camp;
         private Texture2D white_selection_box;
         private Texture2D red_selection_box;
+        private SpriteFont wood_font;
+        private Texture2D score_widget;
 
         private GameMap gameMap;
 
@@ -33,8 +35,11 @@ namespace Omni
 
         public Point MapDimensions = new Point(50, 50);
         public Vector2 TileDimensions = new Vector2(40, 20);
+        public bool DisplayPaths = false;
+        public bool DisplayScore = true;
         public Vector2 MousePos;
         public MouseState MouseState;
+        public KeyboardState KeyboardState;
         public Vector2 CursorMapPos;
         public Vector2 DisplayShift;
         public Vector2 DisplayDimensions;
@@ -94,6 +99,8 @@ namespace Omni
             laborer = Content.Load<Texture2D>("art/units/laborer");
             tree = Content.Load<Texture2D>("art/terrain/tree_1");
             lumber_camp = Content.Load<Texture2D>("art/buildings/lumber_camp");
+            wood_font = Content.Load<SpriteFont>("Score");
+            score_widget = Content.Load<Texture2D>("art/ui/score_widget");
             imageGraphics["Grass Tile"] = grass_tile;
             imageGraphics["Laborer"] = laborer;
             imageGraphics["Tree"] = tree;
@@ -119,32 +126,43 @@ namespace Omni
         protected override void Update(GameTime gameTime)
         {
             Random random = new Random();
-            KeyboardState KeyState = Keyboard.GetState();
+            KeyboardState lastKeyboardState = KeyboardState;
+            KeyboardState = Keyboard.GetState();
             MouseState lastMouseState = MouseState;
             MouseState = Mouse.GetState();
             MousePos.X = MouseState.X;
             MousePos.Y = MouseState.Y;
             CursorMapPos = coordinateConverter.ScreenToMap(MousePos, DisplayShift);
 
-            if (KeyState.IsKeyDown(Keys.Right))
+            if (KeyboardState.IsKeyDown(Keys.Right))
             {
                 DisplayShift.X -= 5;
             }
-            if (KeyState.IsKeyDown(Keys.Left))
+            if (KeyboardState.IsKeyDown(Keys.Left))
             {
                 DisplayShift.X += 5;
             }
-            if (KeyState.IsKeyDown(Keys.Up))
+            if (KeyboardState.IsKeyDown(Keys.Up))
             {
                 DisplayShift.Y += 5;
             }
-            if (KeyState.IsKeyDown(Keys.Down))
+            if (KeyboardState.IsKeyDown(Keys.Down))
             {
                 DisplayShift.Y -= 5;
             }
-            if (KeyState.IsKeyDown(Keys.Escape))
+            if (KeyboardState.IsKeyDown(Keys.Escape))
             {
                 Exit();
+            }
+            if (KeyboardState.IsKeyUp(Keys.P)
+                && lastKeyboardState.IsKeyDown(Keys.P))
+            {
+                DisplayPaths = !DisplayPaths;
+            }
+            if (KeyboardState.IsKeyUp(Keys.S)
+                && lastKeyboardState.IsKeyDown(Keys.S))
+            {
+                DisplayScore = !DisplayScore;
             }
 
             if (MouseState.LeftButton == ButtonState.Released
@@ -173,9 +191,6 @@ namespace Omni
                         gameMap.GetUnits().Add(newLaborer);
                         GameTile theTile = gameMap.game_tiles[(int)spawnTile.Y, (int)spawnTile.X];
                         theTile.Units.Add(newLaborer);
-                        newLaborer.SetTarget(gameMap.GetTerrain());
-                        List<Vector2> newPath = pathfinder.GetPath(spawnTile, newLaborer.GetTarget().Value);
-                        newLaborer.SetPath(newPath);
 
                     }
 
@@ -185,7 +200,7 @@ namespace Omni
 
             foreach (Unit unitObject in gameMap.GetUnits())
             {
-                unitObject.Tick(gameMap);
+                unitObject.Tick(gameMap, Player1, pathfinder);
             }
 
 
@@ -216,17 +231,21 @@ namespace Omni
                 Vector2 selectedTilePosition = new Vector2(stx, sty);
                 spriteBatch.Draw(white_selection_box, new Vector2(selectedTilePosition.X + DisplayShift.X, selectedTilePosition.Y + DisplayShift.Y), Color.White);
             }
-            foreach (Unit unitObject in gameMap.GetUnits())
+            if (DisplayPaths)
             {
-                if (unitObject.GetPath() != null)
+                foreach (Unit unitObject in gameMap.GetUnits())
                 {
-                    foreach (Vector2 pathStep in unitObject.GetPath())
+                    if (unitObject.GetPath() != null)
                     {
-                        (float rbx, float rby) = coordinateConverter.MapToScreen(pathStep.X, pathStep.Y);
-                        spriteBatch.Draw(red_selection_box, new Vector2(rbx + DisplayShift.X, rby + DisplayShift.Y), Color.White);
+                        foreach (Vector2 pathStep in unitObject.GetPath())
+                        {
+                            (float rbx, float rby) = coordinateConverter.MapToScreen(pathStep.X, pathStep.Y);
+                            spriteBatch.Draw(red_selection_box, new Vector2(rbx + DisplayShift.X, rby + DisplayShift.Y), Color.White);
+                        }
                     }
                 }
             }
+
             /// draw the terrain objects next, resources, trees, rocks, etc
             foreach (Terrain terrainObject in gameMap.GetTerrain())
             {
@@ -249,7 +268,11 @@ namespace Omni
                 (float x5, float y5) = coordinateConverter.MapToScreen(unitObject.Get_X(), unitObject.Get_Y());
                 spriteBatch.Draw(imageGraphics[unitObject.name], new Vector2(x5 + DisplayShift.X, y5 + DisplayShift.Y - imageFileHeightOffset), Color.White);
             }
-
+            if (DisplayScore)
+            {
+                spriteBatch.Draw(score_widget, new Vector2(0, 0), Color.White);
+                spriteBatch.DrawString(wood_font, "Wood " + Player1.GetWood(), new Vector2(10, 8), Color.Black);
+            }
             spriteBatch.End();
 
             // TODO: Add your drawing code here

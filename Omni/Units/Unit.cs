@@ -21,15 +21,15 @@ namespace Omni
             this.moveCounterBase = moveCounterBase;
             moveCounter = moveCounterBase;
             pathable = true;
-            target = new Vector2(0, 0);
+            target = null;
         }
-        private void moveIncrement()
+        protected void MoveIncrement()
         {
             moveCounter -= 1;
         }
-        private void move()
+        protected void Move()
         {
-            moveIncrement();
+            MoveIncrement();
             if (moveCounter == 0)
             {
                 /// reset the move counter, and move IMMEDIATELY to the next position in the path
@@ -48,7 +48,7 @@ namespace Omni
                 }
             }
         }
-        public void SetTarget(List<Entity> targetsList)
+        public void SetTargetClosest(List<Entity> targetsList)
         {
             double closestDistance = 99999;
             Entity closestChoice = new Entity(new Vector2());
@@ -75,13 +75,13 @@ namespace Omni
         {
             return path;
         }
-        public void Tick(GameMap gameMap)
+        public virtual void Tick(GameMap gameMap, Player Player1, Pathfinder pathfinder)
         {
             if (target.HasValue)
             {
                 if (path != null)
                 {
-                    move();
+                    Move();
                 }
 
                 else if (gameMap.GetValidNeighbors(coordinates).Contains(target.Value))
@@ -91,7 +91,7 @@ namespace Omni
             }
             else
             {
-                SetTarget(gameMap.GetTerrain());
+                SetTargetClosest(gameMap.GetTerrain());
             }
         }
     }

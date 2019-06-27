@@ -8,6 +8,19 @@ namespace Omni
 {
     class Player
     {
-        public float Wood = 0;
+        private double wood = 0;
+
+        public double GetWood()
+        {
+            return wood;
+        }
+        public void SetWood(double newWood)
+        {
+            wood = newWood;
+        }
+        public void AddWood(double incomingWood)
+        {
+            wood += incomingWood;
+        }
     }
 }

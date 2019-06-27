@@ -11,9 +11,9 @@ namespace Omni
     {
 
         private List<Entity> entities = new List<Entity>();
-        private List<Terrain> terrain = new List<Terrain>();
-        private List<Building> buildings = new List<Building>();
-        private List<Unit> units = new List<Unit>();
+        private List<Entity> terrain = new List<Entity>();
+        private List<Entity> buildings = new List<Entity>();
+        private List<Entity> units = new List<Entity>();
 
         public Point MapDimensions;
         public GameTile[,] game_tiles;
@@ -96,15 +96,15 @@ namespace Omni
             }
             return validNeighbors;
         }
-        public List<Terrain> GetTerrain()
+        public List<Entity> GetTerrain()
         {
             return terrain;
         }
-        public List<Building> GetBuildings()
+        public List<Entity> GetBuildings()
         {
             return buildings;
         }
-        public List<Unit> GetUnits()
+        public List<Entity> GetUnits()
         {
             return units;
         }
