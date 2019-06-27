@@ -9,15 +9,13 @@ namespace Omni
 {
     class Unit : Entity
     {
-        public string name;
         private int moveCounterBase;
         private int moveCounter;
         protected Vector2? target;
         protected List<Vector2> path;
 
-        public Unit(Vector2 coordinates, string name, int moveCounterBase) : base(coordinates)
+        public Unit(Vector2 coordinates, string name, int moveCounterBase) : base(coordinates, name)
         {
-            this.name = name;
             this.moveCounterBase = moveCounterBase;
             moveCounter = moveCounterBase;
             pathable = true;

@@ -46,11 +46,18 @@ namespace Omni.Units
                             && gameMap.GetValidNeighbors(coordinates).Contains(target.Value))
                         {
                             chopTimer -= 1;
-                            if (chopTimer == 0)
+                            if (chopTimer == 0
+                                && target.GetWood() > 0)
                             {
                                 chopTimer = chopTimerBase;
+                                target.ChangeWood(-1);
                                 wood += 1;
                                 if (wood == maxWood)
+                                {
+                                    target = null;
+                                    currentState = State.Dump;
+                                }
+                                if (target.GetWood() = 0)
                                 {
                                     target = null;
                                     currentState = State.Dump;

@@ -9,12 +9,14 @@ namespace Omni
 {
     class Entity
     {
-        protected Vector2 coordinates;
+        public string name;
         public bool pathable = false;
+        protected Vector2 coordinates;
 
-        public Entity(Vector2 coordinates)
+        public Entity(Vector2 coordinates, string name)
         {
             this.coordinates = coordinates;
+            this.name = name;
         }
         public float Get_X()
         {

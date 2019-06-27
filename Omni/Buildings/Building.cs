@@ -9,11 +9,8 @@ namespace Omni
 {
     class Building : Entity
     {
-        public string name;
-
-        public Building(Vector2 coordinates, string name) : base(coordinates)
+        public Building(Vector2 coordinates, string name) : base(coordinates, name)
         {
-            this.name = name;
         }
     }
 }
