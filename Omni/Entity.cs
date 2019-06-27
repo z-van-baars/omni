@@ -10,6 +10,7 @@ namespace Omni
     class Entity
     {
         protected Vector2 coordinates;
+        public bool pathable = false;
 
         public Entity(Vector2 coordinates)
         {

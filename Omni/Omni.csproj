@@ -45,10 +45,12 @@
     <Compile Include="Buildings\Building.cs" />
     <Compile Include="CoordinateConverter.cs" />
     <Compile Include="Entity.cs" />
+    <Compile Include="Buildings\LumberCamp.cs" />
     <Compile Include="Omni.cs" />
     <Compile Include="GameMap.cs" />
     <Compile Include="GameState.cs" />
     <Compile Include="GameTile.cs" />
+    <Compile Include="Pathfinder.cs" />
     <Compile Include="Player.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

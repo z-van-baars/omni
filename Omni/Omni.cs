@@ -1,6 +1,8 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Omni.Buildings;
+using Omni.Units;
 using System;
 using System.Collections.Generic;
 
@@ -15,15 +17,15 @@ namespace Omni
         SpriteBatch spriteBatch;
 
         private CoordinateConverter coordinateConverter;
-        private Dictionary<string, Texture2D> imageGraphics;
+        private Pathfinder pathfinder;
+        private Dictionary<string, Texture2D> imageGraphics = new Dictionary<string, Texture2D>();
         private Texture2D grass_tile;
         private Texture2D laborer;
         private Texture2D tree;
         private Texture2D lumber_camp;
         private Texture2D white_selection_box;
 
-
-        private GameTile[,] game_tiles;
+        private GameMap gameMap;
         private List<Entity> entities = new List<Entity>();
         private List<Terrain> terrain = new List<Terrain>();
         private List<Building> buildings = new List<Building>();
@@ -31,9 +33,10 @@ namespace Omni
         private Player Player1;
 
 
-        public Point MapDimensions = new Point(500, 500);
+        public Point MapDimensions = new Point(50, 50);
         public Vector2 TileDimensions = new Vector2(40, 20);
         public Vector2 MousePos;
+        public MouseState MouseState;
         public Vector2 CursorMapPos;
         public Vector2 DisplayShift;
         public Vector2 DisplayDimensions;
@@ -71,23 +74,20 @@ namespace Omni
 
             Player1 = new Player();
 
-            game_tiles = new GameTile[MapDimensions.Y, MapDimensions.X];
-            for (int y = 0; y < MapDimensions.Y; y++)
-            {                
-                for (int x = 0; x < MapDimensions.Y; x++)
-                {
-                    GameTile gameTile = new GameTile(x, y, "Grass");
-                    game_tiles[y, x] = gameTile;
-                }
-            }
+            gameMap = new GameMap(MapDimensions);
+            gameMap.GenerateMapArray();
+            pathfinder = new Pathfinder(gameMap);
+
+
             Random random = new Random();
-            int num_trees = random.Next(50, 100);
+            int num_trees = random.Next(100, 110);
             for (int t = 0; t < num_trees; t++)
             {
                 int tries = 0;
                 int rand_x = random.Next(0, MapDimensions.X - 1);
                 int rand_y = random.Next(0, MapDimensions.Y - 1);
-                while (game_tiles[rand_y, rand_x].terrain != null || tries <= 5)
+
+                while (gameMap.game_tiles[rand_y, rand_x].Terrain != null)
                 {
                     rand_x = random.Next(0, MapDimensions.X - 1);
                     rand_y = random.Next(0, MapDimensions.Y - 1);
@@ -96,7 +96,7 @@ namespace Omni
                 Tree newTree = new Tree(new Vector2(rand_x, rand_y));
 
                 terrain.Add(newTree);
-                game_tiles[rand_y, rand_x].terrain = newTree;
+                gameMap.game_tiles[rand_y, rand_x].Terrain = newTree;
 
             }
             base.Initialize();
@@ -139,8 +139,10 @@ namespace Omni
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
+            Random random = new Random();
             KeyboardState KeyState = Keyboard.GetState();
-            MouseState MouseState = Mouse.GetState();
+            MouseState lastMouseState = MouseState;
+            MouseState = Mouse.GetState();
             MousePos.X = MouseState.X;
             MousePos.Y = MouseState.Y;
             CursorMapPos = coordinateConverter.ScreenToMap(MousePos, DisplayShift);
@@ -166,11 +168,45 @@ namespace Omni
                 Exit();
             }
 
-    
-            if (MouseState.LeftButton == ButtonState.Pressed)
+            if (MouseState.LeftButton == ButtonState.Released
+                && lastMouseState.LeftButton == ButtonState.Pressed)
             {
                 Vector2 mapCoords = coordinateConverter.ScreenToMap(MousePos, DisplayShift);
-                System.Diagnostics.Debug.WriteLine(mapCoords.X.ToString() + "," + mapCoords.Y.ToString());
+                if (gameMap.IsPointInside(mapCoords)
+                    && gameMap.game_tiles[(int)mapCoords.Y, (int)mapCoords.X].IsPathable())
+                {
+                    LumberCamp newLumberCamp = new LumberCamp(mapCoords);
+                    gameMap.game_tiles[(int)mapCoords.Y, (int)mapCoords.X].Building = newLumberCamp;
+                    buildings.Add(newLumberCamp);
+                    List<Vector2> validNeighbors = gameMap.GetValidNeighbors(mapCoords);
+                    List<Vector2> spawnableNeighbors = new List<Vector2>();
+                    foreach (Vector2 validNeighbor in validNeighbors)
+                    {
+                        if (gameMap.game_tiles[(int)validNeighbor.Y, (int)validNeighbor.X].IsPathable())
+                        {
+                            spawnableNeighbors.Add(validNeighbor);
+                        }
+                    }
+                    for (int x = 0; x < 1; x++)
+                    {
+                        Vector2 spawnTile = spawnableNeighbors[random.Next(spawnableNeighbors.Count)];
+                        Laborer newLaborer = new Laborer(spawnTile);
+                        units.Add(newLaborer);
+                        GameTile theTile = gameMap.game_tiles[(int)spawnTile.Y, (int)spawnTile.X];
+                        theTile.Units.Add(newLaborer);
+                        newLaborer.SetTarget(terrain);
+                        List<Vector2> newPath = pathfinder.GetPath(spawnTile, newLaborer.GetTarget().Value);
+                        newLaborer.SetPath(newPath);
+
+                    }
+
+                }
+                
+            }
+
+            foreach (Unit unitObject in units)
+            {
+                unitObject.Tick(gameMap);
             }
 
 
@@ -180,47 +216,48 @@ namespace Omni
             base.Update(gameTime);
         }
 
-        /// <summary>
-        /// This is called when the game should draw itself.
-        /// </summary>
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
+        /// ???^^^ I don't know what this means ^^^???
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.DarkSlateBlue);
 
+            /// only one spritebatch right now - perhaps more?  dunno if layers will play nice with this
             spriteBatch.Begin();
-            foreach (GameTile tileObject in game_tiles)
+            /// draw all the gametiles - individual draw operations, not (yet) batched, and not collated into a single layer draw op
+            foreach (GameTile tileObject in gameMap.game_tiles)
             {
-                (float x2, float y2) = coordinateConverter.MapToScreen(tileObject.x, tileObject.y);
-                spriteBatch.Draw(grass_tile, new Vector2(x2 + DisplayShift.X, y2 + DisplayShift.Y), Color.White);
+                (float tiX, float tiY) = coordinateConverter.MapToScreen(tileObject.x, tileObject.y);
+                spriteBatch.Draw(grass_tile, new Vector2(tiX + DisplayShift.X, tiY + DisplayShift.Y), Color.White);
             }
-            if (CursorMapPos.X >= 0
-                && CursorMapPos.X < MapDimensions.X
-                && CursorMapPos.Y >= 0
-                && CursorMapPos.Y < MapDimensions.Y)
+            /// draw the selected tile graphic if the selected tile is within the map bounds
+            if (gameMap.IsPointInside(CursorMapPos))
             {
                 (float stx, float sty) = coordinateConverter.MapToScreen(CursorMapPos.X, CursorMapPos.Y);
                 Vector2 selectedTilePosition = new Vector2(stx, sty);
                 spriteBatch.Draw(white_selection_box, new Vector2(selectedTilePosition.X + DisplayShift.X, selectedTilePosition.Y + DisplayShift.Y), Color.White);
             }
-
+            /// draw the terrain objects next, resources, trees, rocks, etc
             foreach (Terrain terrainObject in terrain)
             {
-                (float x3, float y3) = coordinateConverter.MapToScreen(terrainObject.Get_X(), terrainObject.Get_Y());
                 int imageFileHeightOffset = (int)(imageGraphics[terrainObject.name].Height - TileDimensions.Y);
+                (float teX, float teY) = coordinateConverter.MapToScreen(terrainObject.Get_X(), terrainObject.Get_Y());
                 spriteBatch.Draw(imageGraphics[terrainObject.name],
-                    new Vector2(x3 + DisplayShift.X, y3 + DisplayShift.Y - (imageFileHeightOffset)), Color.White);
+                    new Vector2(teX + DisplayShift.X, teY + DisplayShift.Y - (imageFileHeightOffset)), Color.White);
             }
+            /// draw buildings
             foreach (Building buildingObject in buildings)
             {
-                (float x4, float y4) = coordinateConverter.MapToScreen(49, 49);
-                spriteBatch.Draw(imageGraphics[buildingObject.name], new Vector2(x4 + DisplayShift.X, y4 + DisplayShift.Y - 60), Color.White);
+                int imageFileHeightOffset = (int)(imageGraphics[buildingObject.name].Height - TileDimensions.Y);
+                (float bX, float bY) = coordinateConverter.MapToScreen(buildingObject.Get_X(), buildingObject.Get_Y());
+                spriteBatch.Draw(imageGraphics[buildingObject.name], new Vector2(bX + DisplayShift.X, bY + DisplayShift.Y - imageFileHeightOffset), Color.White);
             }
-
+            /// draw (moving) units
             foreach (Unit unitObject in units)
             {
-                (float x5, float y5) = coordinateConverter.MapToScreen(25, 25);
-                spriteBatch.Draw(imageGraphics[unitObject.name], new Vector2(x5 + DisplayShift.X, y5 + DisplayShift.Y - 60), Color.White);
+                int imageFileHeightOffset = (int)(imageGraphics[unitObject.name].Height - TileDimensions.Y);
+                (float x5, float y5) = coordinateConverter.MapToScreen(unitObject.Get_X(), unitObject.Get_Y());
+                spriteBatch.Draw(imageGraphics[unitObject.name], new Vector2(x5 + DisplayShift.X, y5 + DisplayShift.Y - imageFileHeightOffset), Color.White);
             }
 
             spriteBatch.End();

@@ -5,12 +5,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Omni.Units
+namespace Omni.Buildings
 {
-    class Laborer : Unit
+    class LumberCamp : Building
     {
-
-        public Laborer(Vector2 coordinates) : base(coordinates, "Laborer", 30)
+        public LumberCamp(Vector2 coordinates) : base(coordinates, "Lumber Camp")
         {
         }
     }

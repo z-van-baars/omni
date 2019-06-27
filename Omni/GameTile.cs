@@ -11,14 +11,21 @@ namespace Omni
     {
         public int x;
         public int y;
-        public string biome;
-        public string terrain;
+        public string Biome;
+        public List<Unit> Units = new List<Unit>();
+        public Terrain Terrain;
+        public Building Building;
 
-        public GameTile(int x, int y, string biome)
+        public GameTile(int x, int y, string Biome)
         {
             this.x = x;
             this.y = y;
-            this.biome = biome;
+            this.Biome = Biome;
+        }
+        public bool IsPathable()
+        {
+            return ((Terrain == null || Terrain.pathable)
+                    && (Building == null || Building.pathable));
         }
     }
 }
