@@ -106,12 +106,13 @@ namespace Omni
             costSoFar[start] = 0;
             PriorityQueue<Vector2> frontier = new PriorityQueue<Vector2>();
             List<Vector2> neighbors = gameMap.GetValidNeighbors(start);
+            frontier.Enqueue(start, 0);
             foreach (Vector2 tile in neighbors)
             {
                 GameTile tileObject = gameMap.game_tiles[(int)tile.Y, (int)tile.X];
                 if (tileObject.IsPathable())
                 {
-                    frontier.Enqueue(start, 0);
+                    frontier.Enqueue(tile, 0);
                 }
 
             }
