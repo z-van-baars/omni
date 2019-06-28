@@ -71,10 +71,6 @@ namespace Omni
                     closestDistance = currentDistance;
                     closestTile = currentTile;
                 }
-                if (closestTile == target)
-                {
-                    break;
-                }
 
                 List<Vector2> neighbors = gameMap.GetValidNeighbors(currentTile);
                 foreach (Vector2 neighborTile in neighbors)
@@ -92,6 +88,10 @@ namespace Omni
                             frontier.Enqueue(neighborTile, newCost);
                         }
                     }
+                }
+                if (closestTile == target)
+                {
+                    break;
                 }
             }
             return closestTile;

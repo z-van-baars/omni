@@ -35,7 +35,7 @@ namespace Omni
         private Player Player1;
 
 
-        public Point MapDimensions = new Point(100, 100);
+        public Point MapDimensions = new Point(50, 50);
         public Vector2 TileDimensions = new Vector2(40, 20);
         public bool DisplayPaths = false;
         public bool DisplayScore = true;
