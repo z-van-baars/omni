@@ -80,8 +80,7 @@ namespace Omni
                 foreach (Vector2 neighborTile in neighbors)
                 {
                     GameTile tileObject = gameMap.game_tiles[(int)neighborTile.Y, (int)neighborTile.X];
-                    if ((tileObject.Building == null || tileObject.Building.pathable == true)
-                        && (tileObject.Terrain == null || tileObject.Terrain.pathable == true))
+                    if (tileObject.IsPathable())
                     {
                         double tileModifier = 1.0;
                         double distanceFromTarget = Math.Sqrt(Math.Abs(tileObject.X - target.X) + Math.Abs(tileObject.Y - target.Y));
@@ -110,8 +109,7 @@ namespace Omni
             foreach (Vector2 tile in neighbors)
             {
                 GameTile tileObject = gameMap.game_tiles[(int)tile.Y, (int)tile.X];
-                if ((tileObject.Building == null || tileObject.Building.pathable == true)
-                    && (tileObject.Terrain == null || tileObject.Terrain.pathable == true))
+                if (tileObject.IsPathable())
                 {
                     frontier.Enqueue(start, 0);
                 }

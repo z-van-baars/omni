@@ -14,28 +14,29 @@ namespace Omni
         public Tree(Vector2 coordinates) : base(coordinates, "Tree")
         {
         }
-        public void ChangeWood(double amountToChange)
+        public override void ChangeRemaining(double amountToChange)
         {
             wood += amountToChange;
         }
-        public double GetWood()
+        public override double GetRemaining()
         {
             return wood;
         }
-        public void Expire()
+        public override void OnDeath(GameMap gameMap)
         {
-            name = "Stump";
+            Stump newStump = new Stump(coordinates);
+            gameMap.GetTerrain().Add(newStump);
         }
-        public void Tick()
+        public override void Tick(GameMap gameMap, Player Player1, Pathfinder pathfinder)
         {
-            if (wood == 0)
-            {
-                Expire();
-            }
-            else if (wood < 100)
+            if (wood < 100 && name != "Chopped Tree")
             {
                 name = "Chopped Tree";
             }
+        }
+        public override bool IsExpired()
+        {
+            return wood <= 0;
         }
     }
 }

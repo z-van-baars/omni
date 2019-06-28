@@ -10,7 +10,7 @@ namespace Omni
     class Terrain : Entity
     {
         public Terrain(Vector2 coordinates, string name) : base(coordinates, name)
-        { }
+        {
         }
     }
 }

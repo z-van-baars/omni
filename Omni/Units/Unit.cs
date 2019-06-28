@@ -11,28 +11,35 @@ namespace Omni
     {
         private int moveCounterBase;
         private int moveCounter;
-        protected Vector2? target;
+        protected Entity target;
         protected List<Vector2> path;
 
         public Unit(Vector2 coordinates, string name, int moveCounterBase) : base(coordinates, name)
         {
             this.moveCounterBase = moveCounterBase;
             moveCounter = moveCounterBase;
-            pathable = true;
+            pathable = false;
             target = null;
         }
         protected void MoveIncrement()
         {
             moveCounter -= 1;
         }
-        protected void Move()
+        protected bool CheckPath(GameMap gameMap)
+        {
+            return gameMap.game_tiles[(int)path[0].Y, (int)path[0].X].IsPathable();
+        }
+        
+        protected void Move(GameMap gameMap)
         {
             MoveIncrement();
             if (moveCounter == 0)
             {
                 /// reset the move counter, and move IMMEDIATELY to the next position in the path
                 moveCounter = moveCounterBase;
+                gameMap.game_tiles[(int)coordinates.Y, (int)coordinates.X].Unit = null;
                 coordinates = path[0];
+                gameMap.game_tiles[(int)coordinates.Y, (int)coordinates.X].Unit = this;
                 /// !Important Note!: this statement doesn't test if it has arrived at the target!
                 /// It only tests to see if the path list it was given by the pathfinder object
                 /// has any more steps in it!
@@ -46,22 +53,26 @@ namespace Omni
                 }
             }
         }
-        public void SetTargetClosest(List<Entity> targetsList)
+        public void SetTargetClosest(List<Entity> targetsList, Type type)
         {
             double closestDistance = 99999;
-            Entity closestChoice = new Entity(new Vector2());
+            Entity closestChoice = new Entity(new Vector2(), "");
             foreach (Entity possibleChoice in targetsList)
             {
-                double distanceToChoice = Math.Sqrt(Math.Abs(coordinates.X - possibleChoice.Get_X()) + Math.Abs(coordinates.Y - possibleChoice.Get_Y()));
-                if (distanceToChoice < closestDistance)
+                if (possibleChoice.GetType() == type)
                 {
-                    closestDistance = distanceToChoice;
-                    closestChoice = possibleChoice;
+                    double distanceToChoice = Math.Sqrt(Math.Abs(coordinates.X - possibleChoice.Get_X()) + Math.Abs(coordinates.Y - possibleChoice.Get_Y()));
+                    if (distanceToChoice < closestDistance)
+                    {
+                        closestDistance = distanceToChoice;
+                        closestChoice = possibleChoice;
+                    }
                 }
+
             }
-            target = new Vector2(closestChoice.Get_X(), closestChoice.Get_Y());
+            target = closestChoice;
         }
-        public Vector2? GetTarget()
+        public Entity GetTarget()
         {
             return target;
         }
@@ -72,25 +83,6 @@ namespace Omni
         public List<Vector2> GetPath()
         {
             return path;
-        }
-        public virtual void Tick(GameMap gameMap, Player Player1, Pathfinder pathfinder)
-        {
-            if (target.HasValue)
-            {
-                if (path != null)
-                {
-                    Move();
-                }
-
-                else if (gameMap.GetValidNeighbors(coordinates).Contains(target.Value))
-                {
-                    target = null;
-                }
-            }
-            else
-            {
-                SetTargetClosest(gameMap.GetTerrain());
-            }
         }
     }
 }

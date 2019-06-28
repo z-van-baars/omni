@@ -12,7 +12,7 @@ namespace Omni
         public int X;
         public int Y;
         public string Biome;
-        public List<Unit> Units = new List<Unit>();
+        public Unit Unit;
         public Terrain Terrain;
         public Building Building;
 
@@ -25,7 +25,8 @@ namespace Omni
         public bool IsPathable()
         {
             return ((Terrain == null || Terrain.pathable)
-                    && (Building == null || Building.pathable));
+                    && (Building == null || Building.pathable)
+                    && (Unit == null || Unit.pathable));
         }
     }
 }

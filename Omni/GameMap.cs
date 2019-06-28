@@ -39,7 +39,7 @@ namespace Omni
         public void PrimitiveMapGen()
         {
             Random random = new Random();
-            int num_trees = random.Next(100, 110);
+            int num_trees = random.Next(200, 210);
             for (int t = 0; t < num_trees; t++)
             {
                 int tries = 0;

@@ -22,6 +22,8 @@ namespace Omni
         private Texture2D grass_tile;
         private Texture2D laborer;
         private Texture2D tree;
+        private Texture2D tree_chopped;
+        private Texture2D tree_stump;
         private Texture2D lumber_camp;
         private Texture2D white_selection_box;
         private Texture2D red_selection_box;
@@ -54,6 +56,7 @@ namespace Omni
             graphics.PreferredBackBufferWidth = (int)DisplayDimensions.X;
             graphics.PreferredBackBufferHeight = (int)DisplayDimensions.Y;
             graphics.IsFullScreen = false;
+            this.TargetElapsedTime = new System.TimeSpan(0, 0, 0, 0, 33);
         }
 
         /// <summary>
@@ -98,12 +101,16 @@ namespace Omni
             grass_tile = Content.Load<Texture2D>("art/tiles/grass_1");
             laborer = Content.Load<Texture2D>("art/units/laborer");
             tree = Content.Load<Texture2D>("art/terrain/tree_1");
+            tree_chopped = Content.Load<Texture2D>("art/terrain/tree_chopped");
+            tree_stump = Content.Load<Texture2D>("art/terrain/tree_stump");
             lumber_camp = Content.Load<Texture2D>("art/buildings/lumber_camp");
             wood_font = Content.Load<SpriteFont>("Score");
             score_widget = Content.Load<Texture2D>("art/ui/score_widget");
             imageGraphics["Grass Tile"] = grass_tile;
             imageGraphics["Laborer"] = laborer;
             imageGraphics["Tree"] = tree;
+            imageGraphics["Chopped Tree"] = tree_chopped;
+            imageGraphics["Stump"] = tree_stump;
             imageGraphics["Lumber Camp"] = lumber_camp;
 
             // TODO: use this.Content to load your game content here
@@ -125,6 +132,7 @@ namespace Omni
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
+            // IO events start
             Random random = new Random();
             KeyboardState lastKeyboardState = KeyboardState;
             KeyboardState = Keyboard.GetState();
@@ -184,13 +192,13 @@ namespace Omni
                             spawnableNeighbors.Add(validNeighbor);
                         }
                     }
-                    for (int x = 0; x < 1; x++)
+                    for (int x = 0; x < 5; x++)
                     {
                         Vector2 spawnTile = spawnableNeighbors[random.Next(spawnableNeighbors.Count)];
                         Laborer newLaborer = new Laborer(spawnTile);
                         gameMap.GetUnits().Add(newLaborer);
                         GameTile theTile = gameMap.game_tiles[(int)spawnTile.Y, (int)spawnTile.X];
-                        theTile.Units.Add(newLaborer);
+                        theTile.Unit = newLaborer;
 
                     }
 
@@ -198,13 +206,33 @@ namespace Omni
                 
             }
 
+            // IO events end
+
+
+            // game logic start
+            List<Entity> expiredEntities = new List<Entity>();
             foreach (Unit unitObject in gameMap.GetUnits())
             {
                 unitObject.Tick(gameMap, Player1, pathfinder);
             }
+            foreach (Terrain terrainObject in gameMap.GetTerrain())
+            {
+                terrainObject.Tick(gameMap, Player1, pathfinder);
+                if (terrainObject.IsExpired())
+                {
+                    expiredEntities.Add(terrainObject);
+                }
+            }
+            foreach (Entity entityObject in expiredEntities)
+            {
+                entityObject.OnDeath(gameMap);
+                gameMap.GetTerrain().Remove(entityObject);
+                gameMap.GetBuildings().Remove(entityObject);
+
+            }
 
 
-            // TODO: Add your update logic here
+            // game logic ends
 
 
             base.Update(gameTime);

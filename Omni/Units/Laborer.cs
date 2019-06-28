@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using Omni.Buildings;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,6 +20,7 @@ namespace Omni.Units
         public Laborer(Vector2 coordinates) : base(coordinates, "Laborer", 5)
         {
             currentState = State.Idle;
+            pathable = false;
         }
         public override void Tick(GameMap gameMap, Player Player1, Pathfinder pathfinder)
         {
@@ -34,34 +36,45 @@ namespace Omni.Units
                     break;
                 /// chop state
                 case State.Chop:
-                    if (target.HasValue)
+                    if (target != null)
                     {
                         /// if I have a target, do I have a path?
                         if (path != null)
                         {
-                            Move();
+                            if (!CheckPath(gameMap))
+                            {
+                                SetPath(pathfinder.GetPath(coordinates, new Vector2(target.Get_X(), target.Get_Y())));
+                            }
+                            if (path != null)
+                            {
+                                Move(gameMap);
+                            }
                         }
                         /// if I have a null path, is my target in a neighboring tile?
                         else if (path == null
-                            && gameMap.GetValidNeighbors(coordinates).Contains(target.Value))
+                            && gameMap.GetValidNeighbors(coordinates).Contains(new Vector2(target.Get_X(), target.Get_Y())))
                         {
                             chopTimer -= 1;
-                            if (chopTimer == 0
-                                && target.GetWood() > 0)
+                            if (chopTimer == 0)
                             {
                                 chopTimer = chopTimerBase;
-                                target.ChangeWood(-1);
-                                wood += 1;
+                                if (target.GetRemaining() > 0)
+                                {
+                                    chopTimer = chopTimerBase;
+                                    target.ChangeRemaining(-1);
+                                    wood += 1;
+                                }
+                                else
+                                {
+                                    target = null;
+                                    currentState = State.Dump;
+                                }
                                 if (wood == maxWood)
                                 {
                                     target = null;
                                     currentState = State.Dump;
                                 }
-                                if (target.GetWood() = 0)
-                                {
-                                    target = null;
-                                    currentState = State.Dump;
-                                }
+
 
                             }
 
@@ -71,29 +84,33 @@ namespace Omni.Units
                         /// if they've reached the end of their path they will get stuck
                         /// possibly will throw an error
                         else if (path == null
-                            && !gameMap.GetValidNeighbors(coordinates).Contains(target.Value))
+                            && !gameMap.GetValidNeighbors(coordinates).Contains(new Vector2(target.Get_X(), target.Get_Y())))
                         {
-                            SetPath(pathfinder.GetPath(coordinates, (Vector2)target));
+                            SetPath(pathfinder.GetPath(coordinates, new Vector2(target.Get_X(), target.Get_Y())));
                             /// some thing
                         }
                     }
                     else
                     {
-                        SetTargetClosest(gameMap.GetTerrain());
+                        SetTargetClosest(gameMap.GetTerrain(), typeof(Tree));
                     }
                     break;
                 /// dump state
                 case State.Dump:
-                    if (target.HasValue)
+                    if (target != null)
                     {
                         /// if I have a target, do I have a path?
                         if (path != null)
                         {
-                            Move();
+                            if (!CheckPath(gameMap))
+                            {
+                                SetPath(pathfinder.GetPath(coordinates, new Vector2(target.Get_X(), target.Get_Y())));
+                            }
+                            Move(gameMap);
                         }
                         /// if I have a null path, is my target in a neighboring tile?
                         else if (path == null
-                            && gameMap.GetValidNeighbors(coordinates).Contains(target.Value))
+                            && gameMap.GetValidNeighbors(coordinates).Contains(new Vector2(target.Get_X(), target.Get_Y())))
                         {
 
                             target = null;
@@ -106,14 +123,14 @@ namespace Omni.Units
                         /// if they've reached the end of their path they will get stuck
                         /// possibly will throw an error
                         else if (path == null
-                            && !gameMap.GetValidNeighbors(coordinates).Contains(target.Value))
+                            && !gameMap.GetValidNeighbors(coordinates).Contains(new Vector2(target.Get_X(), target.Get_Y())))
                         {
-                            SetPath(pathfinder.GetPath(coordinates, (Vector2)target));
+                            SetPath(pathfinder.GetPath(coordinates, new Vector2(target.Get_X(), target.Get_Y())));
                         }
                     }
                     else
                     {
-                        SetTargetClosest(gameMap.GetBuildings());
+                        SetTargetClosest(gameMap.GetBuildings(), typeof(LumberCamp));
                     }
                     break;
                 /// move state - does not exist outside chop / dump states.

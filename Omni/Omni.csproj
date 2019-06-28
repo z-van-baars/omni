@@ -54,6 +54,7 @@
     <Compile Include="Player.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Terrain\Stump.cs" />
     <Compile Include="Terrain\Terrain.cs" />
     <Compile Include="Terrain\Tree.cs" />
     <Compile Include="Units\Laborer.cs" />
