@@ -35,7 +35,7 @@ namespace Omni
         private Player Player1;
 
 
-        public Point MapDimensions = new Point(50, 50);
+        public Point MapDimensions = new Point(100, 100);
         public Vector2 TileDimensions = new Vector2(40, 20);
         public bool DisplayPaths = false;
         public bool DisplayScore = true;
@@ -45,6 +45,8 @@ namespace Omni
         public Vector2 CursorMapPos;
         public Vector2 DisplayShift;
         public Vector2 DisplayDimensions;
+
+        RenderTarget2D tileDisplayLayer;
 
 
 
@@ -56,7 +58,7 @@ namespace Omni
             graphics.PreferredBackBufferWidth = (int)DisplayDimensions.X;
             graphics.PreferredBackBufferHeight = (int)DisplayDimensions.Y;
             graphics.IsFullScreen = false;
-            this.TargetElapsedTime = new System.TimeSpan(0, 0, 0, 0, 33);
+            TargetElapsedTime = new TimeSpan(0, 0, 0, 0, 17);
         }
 
         /// <summary>
@@ -74,9 +76,6 @@ namespace Omni
                         graphics.GraphicsDevice.Viewport.Height / 2);
             DisplayShift.X = 0;
             DisplayShift.Y = 0;
-            ///(DisplayShift.X, DisplayShift.Y) = coordinateConverter.MapToScreen(MapDimensions.X / 2, MapDimensions.Y / 2);
-            ///DisplayShift.X -= graphics.GraphicsDevice.Viewport.Width / 2;
-            ///DisplayShift.Y -= graphics.GraphicsDevice.Viewport.Width / 2;
 
             Player1 = new Player();
 
@@ -112,6 +111,33 @@ namespace Omni
             imageGraphics["Chopped Tree"] = tree_chopped;
             imageGraphics["Stump"] = tree_stump;
             imageGraphics["Lumber Camp"] = lumber_camp;
+
+
+            float displayLayerWidth = (MapDimensions.X * (TileDimensions.X / 2)) +
+                (MapDimensions.Y * (TileDimensions.X / 2));
+            float displayLayerHeight = (MapDimensions.X * (TileDimensions.Y / 2)) +
+                (MapDimensions.Y * (TileDimensions.Y / 2));
+
+            tileDisplayLayer = new RenderTarget2D(
+                GraphicsDevice,
+                (int)displayLayerWidth,
+                (int)displayLayerHeight,
+                false,
+                SurfaceFormat.Color,
+                DepthFormat.None);
+
+            GraphicsDevice.SetRenderTarget(tileDisplayLayer);
+            GraphicsDevice.Clear(Color.Transparent);
+            spriteBatch.Begin();
+            foreach (GameTile tileObject in gameMap.game_tiles)
+            {
+                (float tiX, float tiY) = coordinateConverter.MapToScreen(tileObject.X, tileObject.Y);
+                float background_center = TileDimensions.X / 2 + (DisplayShift.X + displayLayerWidth / 2);
+                tiX = tiX + background_center - (TileDimensions.X);
+                spriteBatch.Draw(grass_tile, new Vector2(tiX + DisplayShift.X, tiY + DisplayShift.Y), Color.White);
+            }
+            spriteBatch.End();
+            GraphicsDevice.SetRenderTarget(null);
 
             // TODO: use this.Content to load your game content here
         }
@@ -192,7 +218,7 @@ namespace Omni
                             spawnableNeighbors.Add(validNeighbor);
                         }
                     }
-                    for (int x = 0; x < 5; x++)
+                    for (int x = 0; x < 3; x++)
                     {
                         Vector2 spawnTile = spawnableNeighbors[random.Next(spawnableNeighbors.Count)];
                         Laborer newLaborer = new Laborer(spawnTile);
@@ -247,11 +273,7 @@ namespace Omni
             /// only one spritebatch right now - perhaps more?  dunno if layers will play nice with this
             spriteBatch.Begin();
             /// draw all the gametiles - individual draw operations, not (yet) batched, and not collated into a single layer draw op
-            foreach (GameTile tileObject in gameMap.game_tiles)
-            {
-                (float tiX, float tiY) = coordinateConverter.MapToScreen(tileObject.X, tileObject.Y);
-                spriteBatch.Draw(grass_tile, new Vector2(tiX + DisplayShift.X, tiY + DisplayShift.Y), Color.White);
-            }
+            spriteBatch.Draw(tileDisplayLayer, new Vector2(-(tileDisplayLayer.Width / 2) + TileDimensions.X / 2 + DisplayShift.X, DisplayShift.Y), Color.White);
             /// draw the selected tile graphic if the selected tile is within the map bounds
             if (gameMap.IsPointInside(CursorMapPos))
             {
