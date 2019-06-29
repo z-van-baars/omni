@@ -61,7 +61,7 @@ namespace Omni
             {
                 if (possibleChoice.GetType() == type)
                 {
-                    double distanceToChoice = Math.Sqrt(Math.Abs(coordinates.X - possibleChoice.Get_X()) + Math.Abs(coordinates.Y - possibleChoice.Get_Y()));
+                    double distanceToChoice = Math.Sqrt(Math.Abs(coordinates.X - possibleChoice.X) + Math.Abs(coordinates.Y - possibleChoice.Y));
                     if (distanceToChoice < closestDistance)
                     {
                         closestDistance = distanceToChoice;

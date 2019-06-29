@@ -18,14 +18,17 @@ namespace Omni
             this.coordinates = coordinates;
             this.name = name;
         }
-        public float Get_X()
+
+        public float X
         {
-            return coordinates.X;
+            get { return coordinates.X; }
         }
-        public float Get_Y()
+
+        public float Y
         {
-            return coordinates.Y;
+            get { return coordinates.Y; }
         }
+
         public virtual double GetRemaining()
         {
             return 0;

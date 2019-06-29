@@ -132,10 +132,10 @@ namespace Omni
             spriteBatch.Begin();
             foreach (GameTile tileObject in gameMap.game_tiles)
             {
-                (float tiX, float tiY) = coordinateConverter.MapToScreen(tileObject.X, tileObject.Y);
+                var ti = coordinateConverter.MapToScreen(tileObject.X, tileObject.Y);
                 float background_center = TileDimensions.X / 2 + (DisplayShift.X + displayLayerWidth / 2);
-                tiX = tiX + background_center - (TileDimensions.X);
-                spriteBatch.Draw(grass_tile, new Vector2(tiX + DisplayShift.X, tiY + DisplayShift.Y), Color.White);
+                ti.X = ti.X + background_center - (TileDimensions.X);
+                spriteBatch.Draw(grass_tile, new Vector2(ti.X + DisplayShift.X, ti.Y + DisplayShift.Y), Color.White);
             }
             spriteBatch.End();
             GraphicsDevice.SetRenderTarget(null);
@@ -278,9 +278,8 @@ namespace Omni
             /// draw the selected tile graphic if the selected tile is within the map bounds
             if (gameMap.IsPointInside(CursorMapPos))
             {
-                (float stx, float sty) = coordinateConverter.MapToScreen(CursorMapPos.X, CursorMapPos.Y);
-                Vector2 selectedTilePosition = new Vector2(stx, sty);
-                spriteBatch.Draw(white_selection_box, new Vector2(selectedTilePosition.X + DisplayShift.X, selectedTilePosition.Y + DisplayShift.Y), Color.White);
+                var selected = coordinateConverter.MapToScreen(CursorMapPos.X, CursorMapPos.Y);
+                spriteBatch.Draw(white_selection_box, selected + DisplayShift, Color.White);
             }
             if (DisplayPaths)
             {
@@ -290,35 +289,23 @@ namespace Omni
                     {
                         foreach (Vector2 pathStep in unitObject.GetPath())
                         {
-                            (float rbx, float rby) = coordinateConverter.MapToScreen(pathStep.X, pathStep.Y);
-                            spriteBatch.Draw(red_selection_box, new Vector2(rbx + DisplayShift.X, rby + DisplayShift.Y), Color.White);
+                            var rb = coordinateConverter.MapToScreen(pathStep.X, pathStep.Y);
+                            spriteBatch.Draw(red_selection_box, rb + DisplayShift, Color.White);
                         }
                     }
                 }
             }
 
-            /// draw the terrain objects next, resources, trees, rocks, etc
-            foreach (Terrain terrainObject in gameMap.GetTerrain())
+            Action<Entity> drawEntity = entity =>
             {
-                int imageFileHeightOffset = (int)(imageGraphics[terrainObject.name].Height - TileDimensions.Y);
-                (float teX, float teY) = coordinateConverter.MapToScreen(terrainObject.Get_X(), terrainObject.Get_Y());
-                spriteBatch.Draw(imageGraphics[terrainObject.name],
-                    new Vector2(teX + DisplayShift.X, teY + DisplayShift.Y - (imageFileHeightOffset)), Color.White);
-            }
-            /// draw buildings
-            foreach (Building buildingObject in gameMap.GetBuildings())
-            {
-                int imageFileHeightOffset = (int)(imageGraphics[buildingObject.name].Height - TileDimensions.Y);
-                (float bX, float bY) = coordinateConverter.MapToScreen(buildingObject.Get_X(), buildingObject.Get_Y());
-                spriteBatch.Draw(imageGraphics[buildingObject.name], new Vector2(bX + DisplayShift.X, bY + DisplayShift.Y - imageFileHeightOffset), Color.White);
-            }
-            /// draw (moving) units
-            foreach (Unit unitObject in gameMap.GetUnits())
-            {
-                int imageFileHeightOffset = (int)(imageGraphics[unitObject.name].Height - TileDimensions.Y);
-                (float x5, float y5) = coordinateConverter.MapToScreen(unitObject.Get_X(), unitObject.Get_Y());
-                spriteBatch.Draw(imageGraphics[unitObject.name], new Vector2(x5 + DisplayShift.X, y5 + DisplayShift.Y - imageFileHeightOffset), Color.White);
-            }
+                var imageFileHeightOffset = new Vector2(0, imageGraphics[entity.name].Height - TileDimensions.Y);
+                var te = coordinateConverter.MapToScreen(entity.X, entity.Y);
+                spriteBatch.Draw(imageGraphics[entity.name], te + DisplayShift - imageFileHeightOffset, Color.White);
+            };
+            gameMap.GetTerrain().ForEach(drawEntity);
+            gameMap.GetBuildings().ForEach(drawEntity);
+            gameMap.GetUnits().ForEach(drawEntity);
+
             if (DisplayScore)
             {
                 spriteBatch.Draw(score_widget, new Vector2(0, 0), Color.White);
