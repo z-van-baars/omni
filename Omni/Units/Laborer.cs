@@ -17,11 +17,13 @@ namespace Omni.Units
         private int chopTimer = 15;
         private double wood = 0;
         private int maxWood = 10;
-        public Laborer(Vector2 coordinates) : base(coordinates, "Laborer", 5)
+
+        public Laborer(Point coordinates) : base(coordinates, "Laborer", 5)
         {
             currentState = State.Idle;
             pathable = false;
         }
+
         public override void Tick(GameMap gameMap, Player Player1, Pathfinder pathfinder)
         {
             switch (currentState)
@@ -43,7 +45,7 @@ namespace Omni.Units
                         {
                             if (!CheckPath(gameMap))
                             {
-                                SetPath(pathfinder.GetPath(coordinates, new Vector2(target.Get_X(), target.Get_Y())));
+                                SetPath(pathfinder.GetPath(Coordinates, target.Coordinates));
                             }
                             if (path != null)
                             {
@@ -52,7 +54,7 @@ namespace Omni.Units
                         }
                         /// if I have a null path, is my target in a neighboring tile?
                         else if (path == null
-                            && gameMap.GetValidNeighbors(coordinates).Contains(new Vector2(target.Get_X(), target.Get_Y())))
+                            && gameMap.GetValidNeighbors(Coordinates).Contains(target.Coordinates))
                         {
                             chopTimer -= 1;
                             if (chopTimer == 0)
@@ -84,9 +86,9 @@ namespace Omni.Units
                         /// if they've reached the end of their path they will get stuck
                         /// possibly will throw an error
                         else if (path == null
-                            && !gameMap.GetValidNeighbors(coordinates).Contains(new Vector2(target.Get_X(), target.Get_Y())))
+                            && !gameMap.GetValidNeighbors(Coordinates).Contains(target.Coordinates))
                         {
-                            SetPath(pathfinder.GetPath(coordinates, new Vector2(target.Get_X(), target.Get_Y())));
+                            SetPath(pathfinder.GetPath(Coordinates, target.Coordinates));
                             /// some thing
                         }
                     }
@@ -104,13 +106,13 @@ namespace Omni.Units
                         {
                             if (!CheckPath(gameMap))
                             {
-                                SetPath(pathfinder.GetPath(coordinates, new Vector2(target.Get_X(), target.Get_Y())));
+                                SetPath(pathfinder.GetPath(Coordinates, target.Coordinates));
                             }
                             Move(gameMap);
                         }
                         /// if I have a null path, is my target in a neighboring tile?
                         else if (path == null
-                            && gameMap.GetValidNeighbors(coordinates).Contains(new Vector2(target.Get_X(), target.Get_Y())))
+                            && gameMap.GetValidNeighbors(Coordinates).Contains(target.Coordinates))
                         {
 
                             target = null;
@@ -123,9 +125,9 @@ namespace Omni.Units
                         /// if they've reached the end of their path they will get stuck
                         /// possibly will throw an error
                         else if (path == null
-                            && !gameMap.GetValidNeighbors(coordinates).Contains(new Vector2(target.Get_X(), target.Get_Y())))
+                            && !gameMap.GetValidNeighbors(Coordinates).Contains(target.Coordinates))
                         {
-                            SetPath(pathfinder.GetPath(coordinates, new Vector2(target.Get_X(), target.Get_Y())));
+                            SetPath(pathfinder.GetPath(Coordinates, target.Coordinates));
                         }
                     }
                     else
