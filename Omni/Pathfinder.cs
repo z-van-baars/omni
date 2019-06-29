@@ -72,7 +72,7 @@ namespace Omni
                     closestTile = currentTile;
                 }
 
-                List<Vector2> neighbors = gameMap.GetValidNeighbors(currentTile);
+                List < Vector2 > neighbors = gameMap.game_tiles[(int)currentTile.Y, (int)currentTile.X].NeighborsCoords;
                 foreach (Vector2 neighborTile in neighbors)
                 {
                     GameTile tileObject = gameMap.game_tiles[(int)neighborTile.Y, (int)neighborTile.X];
@@ -105,7 +105,7 @@ namespace Omni
             cameFrom[start] = start;
             costSoFar[start] = 0;
             PriorityQueue<Vector2> frontier = new PriorityQueue<Vector2>();
-            List<Vector2> neighbors = gameMap.GetValidNeighbors(start);
+            List<Vector2> neighbors = gameMap.game_tiles[(int)start.Y, (int)start.X].NeighborsCoords;
             frontier.Enqueue(start, 0);
             foreach (Vector2 tile in neighbors)
             {

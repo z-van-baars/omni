@@ -81,6 +81,7 @@ namespace Omni
 
             gameMap = new GameMap(MapDimensions);
             gameMap.GenerateMapArray();
+            gameMap.SetAllTileNeighbors();
             pathfinder = new Pathfinder(gameMap);
             gameMap.PrimitiveMapGen();
 

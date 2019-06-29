@@ -36,6 +36,23 @@ namespace Omni
                 }
             }
         }
+        /// Sets a canonical list of neighbors for each tile so pathfinding operations
+        /// and other operations don't have to compute neighbors anew
+        public void SetAllTileNeighbors()
+        {
+            foreach (GameTile tile in game_tiles)
+            {
+                List<Vector2> neighborCoordList = GetValidNeighbors(new Vector2(tile.X, tile.Y));
+                List<GameTile> neighborTileList = new List<GameTile>();
+                foreach (Vector2 coordinatePair in neighborCoordList)
+                {
+                    GameTile tileObject = game_tiles[(int)coordinatePair.Y, (int)coordinatePair.X];
+                    neighborTileList.Add(tileObject);
+                }
+                tile.SetNeighbors(neighborTileList, neighborCoordList);
+
+            }
+        }
         public void PrimitiveMapGen()
         {
             Random random = new Random();

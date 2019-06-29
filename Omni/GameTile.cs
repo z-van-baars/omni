@@ -1,4 +1,4 @@
-﻿using Microsoft.Xna.Framework.Graphics;
+﻿using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,6 +15,8 @@ namespace Omni
         public Unit Unit;
         public Terrain Terrain;
         public Building Building;
+        public List<Vector2> NeighborsCoords;
+        public List<GameTile> NeighborsTile;
 
         public GameTile(int X, int Y, string Biome)
         {
@@ -27,6 +29,11 @@ namespace Omni
             return ((Terrain == null || Terrain.pathable)
                     && (Building == null || Building.pathable)
                     && (Unit == null || Unit.pathable));
+        }
+        public void SetNeighbors(List<GameTile> neighborTileList, List<Vector2> neighborCoordList)
+        {
+            NeighborsCoords = neighborCoordList;
+            NeighborsTile = neighborTileList;
         }
     }
 }
