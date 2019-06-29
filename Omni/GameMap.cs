@@ -31,7 +31,7 @@ namespace Omni
             {
                 for (int x = 0; x < MapDimensions.Y; x++)
                 {
-                    GameTile gameTile = new GameTile(x, y, "Grass");
+                    GameTile gameTile = new GameTile(new Vector2(x, y), "Grass");
                     game_tiles[y, x] = gameTile;
                 }
             }

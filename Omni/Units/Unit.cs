@@ -55,13 +55,16 @@ namespace Omni
         }
         public void SetTargetClosest(List<Entity> targetsList, Type type)
         {
-            double closestDistance = 99999;
-            Entity closestChoice = new Entity(new Vector2(), "");
-            foreach (Entity possibleChoice in targetsList)
+            double closestDistance = double.PositiveInfinity;
+            Entity closestChoice = targetsList.First();
+            foreach (Entity possibleChoice in targetsList.Skip(1))
             {
                 if (possibleChoice.GetType() == type)
                 {
-                    double distanceToChoice = Math.Sqrt(Math.Abs(coordinates.X - possibleChoice.X) + Math.Abs(coordinates.Y - possibleChoice.Y));
+                    double distanceToChoice = Math.Sqrt(
+                        Math.Abs(coordinates.X - possibleChoice.Coordinates.X) +
+                        Math.Abs(coordinates.Y - possibleChoice.Coordinates.Y));
+
                     if (distanceToChoice < closestDistance)
                     {
                         closestDistance = distanceToChoice;

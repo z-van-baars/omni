@@ -65,7 +65,10 @@ namespace Omni
             while (frontier.Count > 0)
             {
                 currentTile = frontier.Dequeue();
-                double currentDistance = Math.Sqrt(Math.Abs(currentTile.X - target.X) + Math.Abs(currentTile.Y - target.Y));
+                double currentDistance = Math.Sqrt(
+                    Math.Abs(currentTile.X - target.X) +
+                    Math.Abs(currentTile.Y - target.Y));
+
                 if (currentDistance < closestDistance)
                 {
                     closestDistance = currentDistance;
@@ -79,7 +82,9 @@ namespace Omni
                     if (tileObject.IsPathable())
                     {
                         double tileModifier = 1.0;
-                        double distanceFromTarget = Math.Sqrt(Math.Abs(tileObject.X - target.X) + Math.Abs(tileObject.Y - target.Y));
+                        double distanceFromTarget = Math.Sqrt(
+                            Math.Abs(tileObject.Coordinates.X - target.X) +
+                            Math.Abs(tileObject.Coordinates.Y - target.Y));
                         double newCost = (costSoFar[currentTile] + tileModifier) + distanceFromTarget;
                         if (!cameFrom.ContainsKey(neighborTile) || newCost < costSoFar[currentTile])
                         {

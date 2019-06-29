@@ -43,7 +43,7 @@ namespace Omni.Units
                         {
                             if (!CheckPath(gameMap))
                             {
-                                SetPath(pathfinder.GetPath(coordinates, new Vector2(target.X, target.Y)));
+                                SetPath(pathfinder.GetPath(coordinates, target.Coordinates));
                             }
                             if (path != null)
                             {
@@ -52,7 +52,7 @@ namespace Omni.Units
                         }
                         /// if I have a null path, is my target in a neighboring tile?
                         else if (path == null
-                            && gameMap.GetValidNeighbors(coordinates).Contains(new Vector2(target.X, target.Y)))
+                            && gameMap.GetValidNeighbors(coordinates).Contains(target.Coordinates))
                         {
                             chopTimer -= 1;
                             if (chopTimer == 0)
@@ -84,9 +84,9 @@ namespace Omni.Units
                         /// if they've reached the end of their path they will get stuck
                         /// possibly will throw an error
                         else if (path == null
-                            && !gameMap.GetValidNeighbors(coordinates).Contains(new Vector2(target.X, target.Y)))
+                            && !gameMap.GetValidNeighbors(coordinates).Contains(target.Coordinates))
                         {
-                            SetPath(pathfinder.GetPath(coordinates, new Vector2(target.X, target.Y)));
+                            SetPath(pathfinder.GetPath(coordinates, target.Coordinates));
                             /// some thing
                         }
                     }
@@ -104,13 +104,13 @@ namespace Omni.Units
                         {
                             if (!CheckPath(gameMap))
                             {
-                                SetPath(pathfinder.GetPath(coordinates, new Vector2(target.X, target.Y)));
+                                SetPath(pathfinder.GetPath(coordinates, target.Coordinates));
                             }
                             Move(gameMap);
                         }
                         /// if I have a null path, is my target in a neighboring tile?
                         else if (path == null
-                            && gameMap.GetValidNeighbors(coordinates).Contains(new Vector2(target.X, target.Y)))
+                            && gameMap.GetValidNeighbors(coordinates).Contains(target.Coordinates))
                         {
 
                             target = null;
@@ -123,9 +123,9 @@ namespace Omni.Units
                         /// if they've reached the end of their path they will get stuck
                         /// possibly will throw an error
                         else if (path == null
-                            && !gameMap.GetValidNeighbors(coordinates).Contains(new Vector2(target.X, target.Y)))
+                            && !gameMap.GetValidNeighbors(coordinates).Contains(target.Coordinates))
                         {
-                            SetPath(pathfinder.GetPath(coordinates, new Vector2(target.X, target.Y)));
+                            SetPath(pathfinder.GetPath(coordinates, target.Coordinates));
                         }
                     }
                     else

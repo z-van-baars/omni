@@ -9,8 +9,7 @@ namespace Omni
 {
     class GameTile
     {
-        public int X;
-        public int Y;
+        private Vector2 coordinates;
         public string Biome;
         public Unit Unit;
         public Terrain Terrain;
@@ -18,12 +17,17 @@ namespace Omni
         public List<Vector2> NeighborsCoords;
         public List<GameTile> NeighborsTile;
 
-        public GameTile(int X, int Y, string Biome)
+        public GameTile(Vector2 coordinates, string Biome)
         {
-            this.X = X;
-            this.Y = Y;
+            this.coordinates = coordinates;
             this.Biome = Biome;
         }
+
+        public Vector2 Coordinates
+        {
+            get { return coordinates; }
+        }
+
         public bool IsPathable()
         {
             return ((Terrain == null || Terrain.pathable)
