@@ -160,7 +160,7 @@ namespace Omni
         protected override void Update(GameTime gameTime)
         {
             // IO events start
-            Random random = new Random();
+            var random = new Random();
             KeyboardState lastKeyboardState = KeyboardState;
             KeyboardState = Keyboard.GetState();
             MouseState lastMouseState = MouseState;
@@ -203,15 +203,15 @@ namespace Omni
             if (MouseState.LeftButton == ButtonState.Released
                 && lastMouseState.LeftButton == ButtonState.Pressed)
             {
-                Point mapCoords = coordinateConverter.ScreenToMap(MousePos, DisplayShift);
+                var mapCoords = coordinateConverter.ScreenToMap(MousePos, DisplayShift);
                 if (gameMap.IsPointInside(mapCoords)
                     && gameMap.game_tiles[(int)mapCoords.Y, (int)mapCoords.X].IsPathable())
                 {
-                    LumberCamp newLumberCamp = new LumberCamp(mapCoords);
+                    var newLumberCamp = new LumberCamp(mapCoords);
                     gameMap.game_tiles[(int)mapCoords.Y, (int)mapCoords.X].Building = newLumberCamp;
                     gameMap.GetBuildings().Add(newLumberCamp);
-                    List<Point> validNeighbors = gameMap.GetValidNeighbors(mapCoords);
-                    List<Point> spawnableNeighbors = new List<Point>();
+                    var validNeighbors = gameMap.GetValidNeighbors(mapCoords);
+                    var spawnableNeighbors = new List<Point>();
                     foreach (Point validNeighbor in validNeighbors)
                     {
                         if (gameMap.game_tiles[(int)validNeighbor.Y, (int)validNeighbor.X].IsPathable())
@@ -221,10 +221,10 @@ namespace Omni
                     }
                     for (int x = 0; x < 3; x++)
                     {
-                        Point spawnTile = spawnableNeighbors[random.Next(spawnableNeighbors.Count)];
-                        Laborer newLaborer = new Laborer(spawnTile);
+                        var spawnTile = spawnableNeighbors[random.Next(spawnableNeighbors.Count)];
+                        var newLaborer = new Laborer(spawnTile);
                         gameMap.GetUnits().Add(newLaborer);
-                        GameTile theTile = gameMap.game_tiles[(int)spawnTile.Y, (int)spawnTile.X];
+                        var theTile = gameMap.game_tiles[(int)spawnTile.Y, (int)spawnTile.X];
                         theTile.Unit = newLaborer;
 
                     }
@@ -237,12 +237,12 @@ namespace Omni
 
 
             // game logic start
-            List<Entity> expiredEntities = new List<Entity>();
-            foreach (Unit unitObject in gameMap.GetUnits())
+            var expiredEntities = new List<Entity>();
+            foreach (var unitObject in gameMap.GetUnits())
             {
                 unitObject.Tick(gameMap, Player1, pathfinder);
             }
-            foreach (Terrain terrainObject in gameMap.GetTerrain())
+            foreach (var terrainObject in gameMap.GetTerrain())
             {
                 terrainObject.Tick(gameMap, Player1, pathfinder);
                 if (terrainObject.IsExpired())
@@ -250,7 +250,7 @@ namespace Omni
                     expiredEntities.Add(terrainObject);
                 }
             }
-            foreach (Entity entityObject in expiredEntities)
+            foreach (var entityObject in expiredEntities)
             {
                 entityObject.OnDeath(gameMap);
                 gameMap.GetTerrain().Remove(entityObject);

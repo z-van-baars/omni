@@ -39,7 +39,7 @@ namespace Omni
         /// and other operations don't have to compute neighbors anew
         public void SetAllTileNeighbors()
         {
-            foreach (GameTile tile in game_tiles)
+            foreach (var tile in game_tiles)
             {
                 var neighborCoordList = GetValidNeighbors(tile.Coordinates);
                 var neighborTileList = new List<GameTile>();

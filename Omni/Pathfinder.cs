@@ -55,7 +55,7 @@ namespace Omni
         public Pathfinder(GameMap gameMap)
         {
             this.gameMap = gameMap;
-            this.mapDimensions = gameMap.MapDimensions;
+            mapDimensions = gameMap.MapDimensions;
         }
         private Point exploreFrontier(PriorityQueue<Point> frontier, Point target, Dictionary<Point, Point> cameFrom, Dictionary<Point, double> costSoFar)
         {
@@ -77,7 +77,7 @@ namespace Omni
 
                 foreach (Point neighborTile in gameMap.game_tiles[currentTile.X, currentTile.Y].NeighborsCoords)
                 {
-                    GameTile tileObject = gameMap.game_tiles[(int)neighborTile.Y, (int)neighborTile.X];
+                    var tileObject = gameMap.game_tiles[(int)neighborTile.Y, (int)neighborTile.X];
                     if (tileObject.IsPathable())
                     {
                         double tileModifier = 1.0;
@@ -102,18 +102,18 @@ namespace Omni
         }
         public List<Point> GetPath(Point start, Point target)
         {
-            List<Point> path = new List<Point>();
-            Dictionary<Point, Point> cameFrom = new Dictionary<Point, Point>();
-            Dictionary<Point, double> costSoFar = new Dictionary<Point, double>();
-            Point closestTile = new Point();
+            var path = new List<Point>();
+            var cameFrom = new Dictionary<Point, Point>();
+            var costSoFar = new Dictionary<Point, double>();
+            var closestTile = new Point();
             cameFrom[start] = start;
             costSoFar[start] = 0;
 
-            PriorityQueue<Point> frontier = new PriorityQueue<Point>();
+            var frontier = new PriorityQueue<Point>();
             frontier.Enqueue(start, 0);
             foreach (Point tile in gameMap.game_tiles[start.Y, start.X].NeighborsCoords)
             {
-                GameTile tileObject = gameMap.game_tiles[(int)tile.Y, (int)tile.X];
+                var tileObject = gameMap.game_tiles[(int)tile.Y, (int)tile.X];
                 if (tileObject.IsPathable())
                 {
                     frontier.Enqueue(tile, 0);
@@ -122,12 +122,12 @@ namespace Omni
             }
             closestTile = exploreFrontier(
                 frontier, target, cameFrom, costSoFar);
-            List<Point> newPathSteps = new List<Point>();
+            var newPathSteps = new List<Point>();
             newPathSteps.Add(closestTile);
 
             while (true)
             {
-                Point nextTile = newPathSteps[0];
+                var nextTile = newPathSteps[0];
                 if (nextTile == start)
                 {
                     break;
