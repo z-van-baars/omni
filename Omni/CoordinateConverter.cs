@@ -9,38 +9,37 @@ namespace Omni
 {
     class CoordinateConverter
     {
-        private Vector2 tileDimensions;
-        private Vector2 displayDimensions;
+        private Point tileDimensions;
+        private Point displayDimensions;
         
-        public CoordinateConverter(Vector2 tileDimensions, Vector2 displayDimensions)
+        public CoordinateConverter(Point tileDimensions, Point displayDimensions)
         {
             this.tileDimensions = tileDimensions;
         }
 
-        public Vector2 MapToScreen(Vector2 v)
+        public Point MapToScreen(Point v)
         {
             /// converts coordinates into raw pixel output coordinates
-            float x2 = ((((v.X + 1) - (v.Y + 1)) * (tileDimensions.X / 2)) - (tileDimensions.Y / 2));
-            float y2 = (((v.X + v.Y) * (tileDimensions.Y / 2)));
-            return new Vector2(x2, y2);
+            var x2 = ((((v.X + 1) - (v.Y + 1)) * (tileDimensions.X / 2)) - (tileDimensions.Y / 2));
+            var y2 = (((v.X + v.Y) * (tileDimensions.Y / 2)));
+            return new Point(x2, y2);
         }
 
-        public Vector2 ScreenToMap(Vector2 coordinates, Vector2 displayShift)
+        public Point ScreenToMap(Point coordinates, Point displayShift)
         {
             /// screen pixel coordinates to tile translation math - Don't fuck with this it works right now
             /// still a bit squishy though
-            float background_center = tileDimensions.X / 2 + (displayShift.X + displayDimensions.X / 2);
+            var background_center = tileDimensions.X / 2 + (displayShift.X + displayDimensions.X / 2);
 
             /// strips out the display shift camera offset
-            float xt = (coordinates.X - displayShift.X) - (background_center - displayShift.X);
-            float yt = coordinates.Y - displayShift.Y;
+            var xt = (coordinates.X - displayShift.X) - (background_center - displayShift.X);
+            var yt = coordinates.Y - displayShift.Y;
 
             /// converts raw pixel coordinate data into canonical map coordinates
             int column = (int)((xt / (tileDimensions.X / 2) + yt / (tileDimensions.Y / 2)) / 2);
             int row = (int)((yt / (tileDimensions.Y / 2) - xt / (tileDimensions.X / 2)) / 2);
 
-            Vector2 mapCoordinates = new Vector2(column, row);
-            return mapCoordinates;
+            return new Point(column, row);
         }
 
     }

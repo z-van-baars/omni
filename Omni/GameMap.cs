@@ -21,9 +21,8 @@ namespace Omni
         public GameMap(Point MapDimensions)
         {
             this.MapDimensions = MapDimensions;
-
-
         }
+
         public void GenerateMapArray()
         {
             game_tiles = new GameTile[MapDimensions.Y, MapDimensions.X];
@@ -31,7 +30,7 @@ namespace Omni
             {
                 for (int x = 0; x < MapDimensions.Y; x++)
                 {
-                    GameTile gameTile = new GameTile(new Vector2(x, y), "Grass");
+                    var gameTile = new GameTile(new Point(x, y), "Grass");
                     game_tiles[y, x] = gameTile;
                 }
             }
@@ -42,11 +41,11 @@ namespace Omni
         {
             foreach (GameTile tile in game_tiles)
             {
-                List<Vector2> neighborCoordList = GetValidNeighbors(new Vector2(tile.X, tile.Y));
-                List<GameTile> neighborTileList = new List<GameTile>();
-                foreach (Vector2 coordinatePair in neighborCoordList)
+                var neighborCoordList = GetValidNeighbors(tile.Coordinates);
+                var neighborTileList = new List<GameTile>();
+                foreach (var coordinatePair in neighborCoordList)
                 {
-                    GameTile tileObject = game_tiles[(int)coordinatePair.Y, (int)coordinatePair.X];
+                    var tileObject = game_tiles[(int)coordinatePair.Y, (int)coordinatePair.X];
                     neighborTileList.Add(tileObject);
                 }
                 tile.SetNeighbors(neighborTileList, neighborCoordList);
@@ -55,7 +54,7 @@ namespace Omni
         }
         public void PrimitiveMapGen()
         {
-            Random random = new Random();
+            var random = new Random();
             int num_trees = random.Next(400, 450);
             for (int t = 0; t < num_trees; t++)
             {
@@ -69,14 +68,14 @@ namespace Omni
                     rand_y = random.Next(0, MapDimensions.Y - 1);
                     tries += 1;
                 }
-                Tree newTree = new Tree(new Vector2(rand_x, rand_y));
+                var newTree = new Tree(new Point(rand_x, rand_y));
 
                 terrain.Add(newTree);
                 game_tiles[rand_y, rand_x].Terrain = newTree;
 
             }
         }
-        public bool IsPointInside(Vector2 mapCoordinates)
+        public bool IsPointInside(Point mapCoordinates)
         {
             if (mapCoordinates.X >= 0
                 && mapCoordinates.X < MapDimensions.X
@@ -87,28 +86,28 @@ namespace Omni
             }
             return false;
         }
-        public List<Vector2> GetValidNeighbors(Vector2 coordinates)
+        public List<Point> GetValidNeighbors(Point coordinates)
         {
-            List<Vector2> validNeighbors = new List<Vector2>();
-            List<Vector2> candidateNeighbors = new List<Vector2>()
+            var validNeighbors = new List<Point>();
+            var candidateNeighbors = new List<Point>()
             {
-                new Vector2(-1, -1),
-                new Vector2(0, -1),
-                new Vector2(1, -1),
-                new Vector2(-1, 0),
-                new Vector2(1, 0),
-                new Vector2(-1, 1),
-                new Vector2(0, 1),
-                new Vector2(1, 1)
+                new Point(-1, -1),
+                new Point(0, -1),
+                new Point(1, -1),
+                new Point(-1, 0),
+                new Point(1, 0),
+                new Point(-1, 1),
+                new Point(0, 1),
+                new Point(1, 1)
             };
-            foreach (Vector2 altPoint in candidateNeighbors)
+            foreach (Point altPoint in candidateNeighbors)
             {
                 if (coordinates.X + altPoint.X >= 0
                     && coordinates.X + altPoint.X < MapDimensions.X
                     && coordinates.Y + altPoint.Y >= 0
                     && coordinates.Y + altPoint.Y < MapDimensions.Y)
                 {
-                    validNeighbors.Add(new Vector2(coordinates.X + altPoint.X, coordinates.Y + altPoint.Y));
+                    validNeighbors.Add(coordinates + altPoint);
                 }
             }
             return validNeighbors;

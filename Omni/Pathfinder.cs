@@ -57,11 +57,11 @@ namespace Omni
             this.gameMap = gameMap;
             this.mapDimensions = gameMap.MapDimensions;
         }
-        private Vector2 exploreFrontier(PriorityQueue<Vector2> frontier, Vector2 target, Dictionary<Vector2, Vector2> cameFrom, Dictionary<Vector2, double> costSoFar)
+        private Point exploreFrontier(PriorityQueue<Point> frontier, Point target, Dictionary<Point, Point> cameFrom, Dictionary<Point, double> costSoFar)
         {
-            Vector2 closestTile = new Vector2();
-            Vector2 currentTile;
-            double closestDistance = 99999;
+            Point closestTile = new Point();
+            Point currentTile;
+            double closestDistance = double.PositiveInfinity;
             while (frontier.Count > 0)
             {
                 currentTile = frontier.Dequeue();
@@ -75,8 +75,7 @@ namespace Omni
                     closestTile = currentTile;
                 }
 
-                List < Vector2 > neighbors = gameMap.game_tiles[(int)currentTile.Y, (int)currentTile.X].NeighborsCoords;
-                foreach (Vector2 neighborTile in neighbors)
+                foreach (Point neighborTile in gameMap.game_tiles[currentTile.X, currentTile.Y].NeighborsCoords)
                 {
                     GameTile tileObject = gameMap.game_tiles[(int)neighborTile.Y, (int)neighborTile.X];
                     if (tileObject.IsPathable())
@@ -101,18 +100,18 @@ namespace Omni
             }
             return closestTile;
         }
-        public List<Vector2> GetPath(Vector2 start, Vector2 target)
+        public List<Point> GetPath(Point start, Point target)
         {
-            List<Vector2> path = new List<Vector2>();
-            Dictionary<Vector2, Vector2> cameFrom = new Dictionary<Vector2, Vector2>();
-            Dictionary<Vector2, double> costSoFar = new Dictionary<Vector2, double>();
-            Vector2 closestTile = new Vector2();
+            List<Point> path = new List<Point>();
+            Dictionary<Point, Point> cameFrom = new Dictionary<Point, Point>();
+            Dictionary<Point, double> costSoFar = new Dictionary<Point, double>();
+            Point closestTile = new Point();
             cameFrom[start] = start;
             costSoFar[start] = 0;
-            PriorityQueue<Vector2> frontier = new PriorityQueue<Vector2>();
-            List<Vector2> neighbors = gameMap.game_tiles[(int)start.Y, (int)start.X].NeighborsCoords;
+
+            PriorityQueue<Point> frontier = new PriorityQueue<Point>();
             frontier.Enqueue(start, 0);
-            foreach (Vector2 tile in neighbors)
+            foreach (Point tile in gameMap.game_tiles[start.Y, start.X].NeighborsCoords)
             {
                 GameTile tileObject = gameMap.game_tiles[(int)tile.Y, (int)tile.X];
                 if (tileObject.IsPathable())
@@ -123,12 +122,12 @@ namespace Omni
             }
             closestTile = exploreFrontier(
                 frontier, target, cameFrom, costSoFar);
-            List<Vector2> newPathSteps = new List<Vector2>();
+            List<Point> newPathSteps = new List<Point>();
             newPathSteps.Add(closestTile);
 
             while (true)
             {
-                Vector2 nextTile = newPathSteps[0];
+                Point nextTile = newPathSteps[0];
                 if (nextTile == start)
                 {
                     break;

@@ -9,7 +9,7 @@ namespace Omni
 {
     class Stump : Terrain
     {
-        public Stump(Vector2 coordinates) : base(coordinates, "Stump")
+        public Stump(Point coordinates) : base(coordinates, "Stump")
         {
 
         }

@@ -11,15 +11,15 @@ namespace Omni
     {
         public string name;
         public bool pathable = false;
-        protected Vector2 coordinates;
+        protected Point coordinates;
 
-        public Entity(Vector2 coordinates, string name)
+        public Entity(Point coordinates, string name)
         {
             this.coordinates = coordinates;
             this.name = name;
         }
 
-        public Vector2 Coordinates
+        public Point Coordinates
         {
             get { return coordinates; }
         }

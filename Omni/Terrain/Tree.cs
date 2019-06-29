@@ -11,9 +11,10 @@ namespace Omni
     {
         private double wood = 100;
 
-        public Tree(Vector2 coordinates) : base(coordinates, "Tree")
+        public Tree(Point coordinates) : base(coordinates, "Tree")
         {
         }
+
         public override void ChangeRemaining(double amountToChange)
         {
             wood += amountToChange;

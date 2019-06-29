@@ -17,11 +17,13 @@ namespace Omni.Units
         private int chopTimer = 15;
         private double wood = 0;
         private int maxWood = 10;
-        public Laborer(Vector2 coordinates) : base(coordinates, "Laborer", 5)
+
+        public Laborer(Point coordinates) : base(coordinates, "Laborer", 5)
         {
             currentState = State.Idle;
             pathable = false;
         }
+
         public override void Tick(GameMap gameMap, Player Player1, Pathfinder pathfinder)
         {
             switch (currentState)

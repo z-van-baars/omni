@@ -66,6 +66,7 @@
     <Compile Include="CoordinateConverter.cs" />
     <Compile Include="Entity.cs" />
     <Compile Include="Buildings\LumberCamp.cs" />
+    <Compile Include="ExtensionMethods.cs" />
     <Compile Include="Omni.cs" />
     <Compile Include="GameMap.cs" />
     <Compile Include="GameState.cs" />

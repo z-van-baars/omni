@@ -12,9 +12,9 @@ namespace Omni
         private int moveCounterBase;
         private int moveCounter;
         protected Entity target;
-        protected List<Vector2> path;
+        protected List<Point> path;
 
-        public Unit(Vector2 coordinates, string name, int moveCounterBase) : base(coordinates, name)
+        public Unit(Point coordinates, string name, int moveCounterBase) : base(coordinates, name)
         {
             this.moveCounterBase = moveCounterBase;
             moveCounter = moveCounterBase;
@@ -79,11 +79,11 @@ namespace Omni
         {
             return target;
         }
-        public void SetPath(List<Vector2> Path)
+        public void SetPath(List<Point> Path)
         {
             path = Path;
         }
-        public List<Vector2> GetPath()
+        public List<Point> GetPath()
         {
             return path;
         }

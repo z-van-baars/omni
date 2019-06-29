@@ -36,15 +36,15 @@ namespace Omni
 
 
         public Point MapDimensions = new Point(50, 50);
-        public Vector2 TileDimensions = new Vector2(40, 20);
+        public Point TileDimensions = new Point(40, 20);
         public bool DisplayPaths = false;
         public bool DisplayScore = true;
-        public Vector2 MousePos;
+        public Point MousePos;
         public MouseState MouseState;
         public KeyboardState KeyboardState;
-        public Vector2 CursorMapPos;
-        public Vector2 DisplayShift;
-        public Vector2 DisplayDimensions;
+        public Point CursorMapPos;
+        public Point DisplayShift;
+        public Point DisplayDimensions;
 
         RenderTarget2D tileDisplayLayer;
 
@@ -53,7 +53,7 @@ namespace Omni
         public Omni()
         {
             graphics = new GraphicsDeviceManager(this);
-            DisplayDimensions = new Vector2(1600, 900);
+            DisplayDimensions = new Point(1600, 900);
             Content.RootDirectory = "Content";
             graphics.PreferredBackBufferWidth = (int)DisplayDimensions.X;
             graphics.PreferredBackBufferHeight = (int)DisplayDimensions.Y;
@@ -72,7 +72,7 @@ namespace Omni
             // TODO: Add your initialization logic
             coordinateConverter = new CoordinateConverter(TileDimensions, DisplayDimensions);
             this.IsMouseVisible = true;
-            MousePos = new Vector2(graphics.GraphicsDevice.Viewport.Width / 2,
+            MousePos = new Point(graphics.GraphicsDevice.Viewport.Width / 2,
                         graphics.GraphicsDevice.Viewport.Height / 2);
             DisplayShift.X = 0;
             DisplayShift.Y = 0;
@@ -114,15 +114,15 @@ namespace Omni
             imageGraphics["Lumber Camp"] = lumber_camp;
 
 
-            float displayLayerWidth = (MapDimensions.X * (TileDimensions.X / 2)) +
+            var displayLayerWidth = (MapDimensions.X * (TileDimensions.X / 2)) +
                 (MapDimensions.Y * (TileDimensions.X / 2));
-            float displayLayerHeight = (MapDimensions.X * (TileDimensions.Y / 2)) +
+            var displayLayerHeight = (MapDimensions.X * (TileDimensions.Y / 2)) +
                 (MapDimensions.Y * (TileDimensions.Y / 2));
 
             tileDisplayLayer = new RenderTarget2D(
                 GraphicsDevice,
-                (int)displayLayerWidth,
-                (int)displayLayerHeight,
+                displayLayerWidth,
+                displayLayerHeight,
                 false,
                 SurfaceFormat.Color,
                 DepthFormat.None);
@@ -133,9 +133,9 @@ namespace Omni
             foreach (GameTile tileObject in gameMap.game_tiles)
             {
                 var ti = coordinateConverter.MapToScreen(tileObject.Coordinates);
-                float background_center = TileDimensions.X / 2 + (DisplayShift.X + displayLayerWidth / 2);
+                var background_center = TileDimensions.X / 2 + (DisplayShift.X + displayLayerWidth / 2);
                 ti.X = ti.X + background_center - (TileDimensions.X);
-                spriteBatch.Draw(grass_tile, new Vector2(ti.X + DisplayShift.X, ti.Y + DisplayShift.Y), Color.White);
+                spriteBatch.Draw(grass_tile, (ti + DisplayShift).ToVector2(), Color.White);
             }
             spriteBatch.End();
             GraphicsDevice.SetRenderTarget(null);
@@ -203,16 +203,16 @@ namespace Omni
             if (MouseState.LeftButton == ButtonState.Released
                 && lastMouseState.LeftButton == ButtonState.Pressed)
             {
-                Vector2 mapCoords = coordinateConverter.ScreenToMap(MousePos, DisplayShift);
+                Point mapCoords = coordinateConverter.ScreenToMap(MousePos, DisplayShift);
                 if (gameMap.IsPointInside(mapCoords)
                     && gameMap.game_tiles[(int)mapCoords.Y, (int)mapCoords.X].IsPathable())
                 {
                     LumberCamp newLumberCamp = new LumberCamp(mapCoords);
                     gameMap.game_tiles[(int)mapCoords.Y, (int)mapCoords.X].Building = newLumberCamp;
                     gameMap.GetBuildings().Add(newLumberCamp);
-                    List<Vector2> validNeighbors = gameMap.GetValidNeighbors(mapCoords);
-                    List<Vector2> spawnableNeighbors = new List<Vector2>();
-                    foreach (Vector2 validNeighbor in validNeighbors)
+                    List<Point> validNeighbors = gameMap.GetValidNeighbors(mapCoords);
+                    List<Point> spawnableNeighbors = new List<Point>();
+                    foreach (Point validNeighbor in validNeighbors)
                     {
                         if (gameMap.game_tiles[(int)validNeighbor.Y, (int)validNeighbor.X].IsPathable())
                         {
@@ -221,7 +221,7 @@ namespace Omni
                     }
                     for (int x = 0; x < 3; x++)
                     {
-                        Vector2 spawnTile = spawnableNeighbors[random.Next(spawnableNeighbors.Count)];
+                        Point spawnTile = spawnableNeighbors[random.Next(spawnableNeighbors.Count)];
                         Laborer newLaborer = new Laborer(spawnTile);
                         gameMap.GetUnits().Add(newLaborer);
                         GameTile theTile = gameMap.game_tiles[(int)spawnTile.Y, (int)spawnTile.X];
@@ -279,7 +279,7 @@ namespace Omni
             if (gameMap.IsPointInside(CursorMapPos))
             {
                 var selected = coordinateConverter.MapToScreen(CursorMapPos);
-                spriteBatch.Draw(white_selection_box, selected + DisplayShift, Color.White);
+                spriteBatch.Draw(white_selection_box, (selected + DisplayShift).ToVector2(), Color.White);
             }
             if (DisplayPaths)
             {
@@ -287,10 +287,10 @@ namespace Omni
                 {
                     if (unitObject.GetPath() != null)
                     {
-                        foreach (Vector2 pathStep in unitObject.GetPath())
+                        foreach (Point pathStep in unitObject.GetPath())
                         {
                             var rb = coordinateConverter.MapToScreen(pathStep);
-                            spriteBatch.Draw(red_selection_box, rb + DisplayShift, Color.White);
+                            spriteBatch.Draw(red_selection_box, (rb + DisplayShift).ToVector2(), Color.White);
                         }
                     }
                 }
@@ -298,9 +298,9 @@ namespace Omni
 
             Action<Entity> drawEntity = entity =>
             {
-                var imageFileHeightOffset = new Vector2(0, imageGraphics[entity.name].Height - TileDimensions.Y);
+                var imageFileHeightOffset = new Point(0, imageGraphics[entity.name].Height - TileDimensions.Y);
                 var te = coordinateConverter.MapToScreen(entity.Coordinates);
-                spriteBatch.Draw(imageGraphics[entity.name], te + DisplayShift - imageFileHeightOffset, Color.White);
+                spriteBatch.Draw(imageGraphics[entity.name], (te + DisplayShift - imageFileHeightOffset).ToVector2(), Color.White);
             };
             gameMap.GetTerrain().ForEach(drawEntity);
             gameMap.GetBuildings().ForEach(drawEntity);

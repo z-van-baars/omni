@@ -7,10 +7,11 @@ using System.Threading.Tasks;
 
 namespace Omni
 {
-    class Building : Entity
+    public static class ExtensionMethods
     {
-        public Building(Point coordinates, string name) : base(coordinates, name)
+        public static Vector2 ToVector2(this Point point)
         {
+            return new Vector2(point.X, point.Y);
         }
     }
 }
