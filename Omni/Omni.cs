@@ -18,7 +18,7 @@ namespace Omni
 
         private CoordinateConverter coordinateConverter;
         private Pathfinder pathfinder;
-        private Dictionary<string, Texture2D> imageGraphics = new Dictionary<string, Texture2D>();
+        private readonly Dictionary<string, Texture2D> imageGraphics = new Dictionary<string, Texture2D>();
         private Texture2D grass_tile;
         private Texture2D laborer;
         private Texture2D tree;
@@ -36,15 +36,15 @@ namespace Omni
 
 
         public Point MapDimensions = new Point(50, 50);
-        public Vector2 TileDimensions = new Vector2(40, 20);
+        public Point TileDimensions = new Point(40, 20);
         public bool DisplayPaths = false;
         public bool DisplayScore = true;
-        public Vector2 MousePos;
+        public Point MousePos;
         public MouseState MouseState;
         public KeyboardState KeyboardState;
-        public Vector2 CursorMapPos;
-        public Vector2 DisplayShift;
-        public Vector2 DisplayDimensions;
+        public Point CursorMapPos;
+        public Point DisplayShift;
+        public Point DisplayDimensions;
 
         RenderTarget2D tileDisplayLayer;
 
@@ -53,7 +53,7 @@ namespace Omni
         public Omni()
         {
             graphics = new GraphicsDeviceManager(this);
-            DisplayDimensions = new Vector2(1600, 900);
+            DisplayDimensions = new Point(1600, 900);
             Content.RootDirectory = "Content";
             graphics.PreferredBackBufferWidth = (int)DisplayDimensions.X;
             graphics.PreferredBackBufferHeight = (int)DisplayDimensions.Y;
@@ -71,9 +71,9 @@ namespace Omni
         {
             // TODO: Add your initialization logic
             coordinateConverter = new CoordinateConverter(TileDimensions, DisplayDimensions);
-            this.IsMouseVisible = true;
-            MousePos = new Vector2(graphics.GraphicsDevice.Viewport.Width / 2,
-                        graphics.GraphicsDevice.Viewport.Height / 2);
+            IsMouseVisible = true;
+            MousePos = new Point(graphics.GraphicsDevice.Viewport.Width / 2,
+                                 graphics.GraphicsDevice.Viewport.Height / 2);
             DisplayShift.X = 0;
             DisplayShift.Y = 0;
 
@@ -114,15 +114,15 @@ namespace Omni
             imageGraphics["Lumber Camp"] = lumber_camp;
 
 
-            float displayLayerWidth = (MapDimensions.X * (TileDimensions.X / 2)) +
+            int displayLayerWidth = (MapDimensions.X * (TileDimensions.X / 2)) +
                 (MapDimensions.Y * (TileDimensions.X / 2));
-            float displayLayerHeight = (MapDimensions.X * (TileDimensions.Y / 2)) +
+            int displayLayerHeight = (MapDimensions.X * (TileDimensions.Y / 2)) +
                 (MapDimensions.Y * (TileDimensions.Y / 2));
 
             tileDisplayLayer = new RenderTarget2D(
                 GraphicsDevice,
-                (int)displayLayerWidth,
-                (int)displayLayerHeight,
+                displayLayerWidth,
+                displayLayerHeight,
                 false,
                 SurfaceFormat.Color,
                 DepthFormat.None);
@@ -132,10 +132,10 @@ namespace Omni
             spriteBatch.Begin();
             foreach (GameTile tileObject in gameMap.game_tiles)
             {
-                (float tiX, float tiY) = coordinateConverter.MapToScreen(tileObject.X, tileObject.Y);
-                float background_center = TileDimensions.X / 2 + (DisplayShift.X + displayLayerWidth / 2);
-                tiX = tiX + background_center - (TileDimensions.X);
-                spriteBatch.Draw(grass_tile, new Vector2(tiX + DisplayShift.X, tiY + DisplayShift.Y), Color.White);
+                var ti = coordinateConverter.MapToScreen(tileObject.Coordinates);
+                int background_center = TileDimensions.X / 2 + (DisplayShift.X + displayLayerWidth / 2);
+                ti.X = ti.X + background_center - (TileDimensions.X);
+                spriteBatch.Draw(grass_tile, (ti + DisplayShift).ToVector2(), Color.White);
             }
             spriteBatch.End();
             GraphicsDevice.SetRenderTarget(null);
@@ -160,10 +160,10 @@ namespace Omni
         protected override void Update(GameTime gameTime)
         {
             // IO events start
-            Random random = new Random();
-            KeyboardState lastKeyboardState = KeyboardState;
+            var random = new Random();
+            var lastKeyboardState = KeyboardState;
             KeyboardState = Keyboard.GetState();
-            MouseState lastMouseState = MouseState;
+            var lastMouseState = MouseState;
             MouseState = Mouse.GetState();
             MousePos.X = MouseState.X;
             MousePos.Y = MouseState.Y;
@@ -203,16 +203,16 @@ namespace Omni
             if (MouseState.LeftButton == ButtonState.Released
                 && lastMouseState.LeftButton == ButtonState.Pressed)
             {
-                Vector2 mapCoords = coordinateConverter.ScreenToMap(MousePos, DisplayShift);
+                var mapCoords = coordinateConverter.ScreenToMap(MousePos, DisplayShift);
                 if (gameMap.IsPointInside(mapCoords)
-                    && gameMap.game_tiles[(int)mapCoords.Y, (int)mapCoords.X].IsPathable())
+                    && gameMap.game_tiles[mapCoords.Y, mapCoords.X].IsPathable())
                 {
-                    LumberCamp newLumberCamp = new LumberCamp(mapCoords);
-                    gameMap.game_tiles[(int)mapCoords.Y, (int)mapCoords.X].Building = newLumberCamp;
+                    var newLumberCamp = new LumberCamp(mapCoords);
+                    gameMap.game_tiles[mapCoords.Y, mapCoords.X].Building = newLumberCamp;
                     gameMap.GetBuildings().Add(newLumberCamp);
-                    List<Vector2> validNeighbors = gameMap.GetValidNeighbors(mapCoords);
-                    List<Vector2> spawnableNeighbors = new List<Vector2>();
-                    foreach (Vector2 validNeighbor in validNeighbors)
+                    var validNeighbors = gameMap.GetValidNeighbors(mapCoords);
+                    var spawnableNeighbors = new List<Point>();
+                    foreach (var validNeighbor in validNeighbors)
                     {
                         if (gameMap.game_tiles[(int)validNeighbor.Y, (int)validNeighbor.X].IsPathable())
                         {
@@ -221,10 +221,10 @@ namespace Omni
                     }
                     for (int x = 0; x < 3; x++)
                     {
-                        Vector2 spawnTile = spawnableNeighbors[random.Next(spawnableNeighbors.Count)];
-                        Laborer newLaborer = new Laborer(spawnTile);
+                        var spawnTile = spawnableNeighbors[random.Next(spawnableNeighbors.Count)];
+                        var newLaborer = new Laborer(spawnTile);
                         gameMap.GetUnits().Add(newLaborer);
-                        GameTile theTile = gameMap.game_tiles[(int)spawnTile.Y, (int)spawnTile.X];
+                        var theTile = gameMap.game_tiles[(int)spawnTile.Y, (int)spawnTile.X];
                         theTile.Unit = newLaborer;
 
                     }
@@ -237,12 +237,12 @@ namespace Omni
 
 
             // game logic start
-            List<Entity> expiredEntities = new List<Entity>();
-            foreach (Unit unitObject in gameMap.GetUnits())
+            var expiredEntities = new List<Entity>();
+            foreach (var unitObject in gameMap.GetUnits())
             {
                 unitObject.Tick(gameMap, Player1, pathfinder);
             }
-            foreach (Terrain terrainObject in gameMap.GetTerrain())
+            foreach (var terrainObject in gameMap.GetTerrain())
             {
                 terrainObject.Tick(gameMap, Player1, pathfinder);
                 if (terrainObject.IsExpired())
@@ -250,7 +250,7 @@ namespace Omni
                     expiredEntities.Add(terrainObject);
                 }
             }
-            foreach (Entity entityObject in expiredEntities)
+            foreach (var entityObject in expiredEntities)
             {
                 entityObject.OnDeath(gameMap);
                 gameMap.GetTerrain().Remove(entityObject);
@@ -278,9 +278,8 @@ namespace Omni
             /// draw the selected tile graphic if the selected tile is within the map bounds
             if (gameMap.IsPointInside(CursorMapPos))
             {
-                (float stx, float sty) = coordinateConverter.MapToScreen(CursorMapPos.X, CursorMapPos.Y);
-                Vector2 selectedTilePosition = new Vector2(stx, sty);
-                spriteBatch.Draw(white_selection_box, new Vector2(selectedTilePosition.X + DisplayShift.X, selectedTilePosition.Y + DisplayShift.Y), Color.White);
+                var st = coordinateConverter.MapToScreen(CursorMapPos);
+                spriteBatch.Draw(white_selection_box, (st + DisplayShift).ToVector2(), Color.White);
             }
             if (DisplayPaths)
             {
@@ -288,37 +287,26 @@ namespace Omni
                 {
                     if (unitObject.GetPath() != null)
                     {
-                        foreach (Vector2 pathStep in unitObject.GetPath())
+                        foreach (var pathStep in unitObject.GetPath())
                         {
-                            (float rbx, float rby) = coordinateConverter.MapToScreen(pathStep.X, pathStep.Y);
-                            spriteBatch.Draw(red_selection_box, new Vector2(rbx + DisplayShift.X, rby + DisplayShift.Y), Color.White);
+                            var rb = coordinateConverter.MapToScreen(pathStep);
+                            spriteBatch.Draw(red_selection_box, (rb + DisplayShift).ToVector2(), Color.White);
                         }
                     }
                 }
             }
 
-            /// draw the terrain objects next, resources, trees, rocks, etc
-            foreach (Terrain terrainObject in gameMap.GetTerrain())
+            Action<Entity> drawEntity = entity =>
             {
-                int imageFileHeightOffset = (int)(imageGraphics[terrainObject.name].Height - TileDimensions.Y);
-                (float teX, float teY) = coordinateConverter.MapToScreen(terrainObject.Get_X(), terrainObject.Get_Y());
-                spriteBatch.Draw(imageGraphics[terrainObject.name],
-                    new Vector2(teX + DisplayShift.X, teY + DisplayShift.Y - (imageFileHeightOffset)), Color.White);
-            }
-            /// draw buildings
-            foreach (Building buildingObject in gameMap.GetBuildings())
-            {
-                int imageFileHeightOffset = (int)(imageGraphics[buildingObject.name].Height - TileDimensions.Y);
-                (float bX, float bY) = coordinateConverter.MapToScreen(buildingObject.Get_X(), buildingObject.Get_Y());
-                spriteBatch.Draw(imageGraphics[buildingObject.name], new Vector2(bX + DisplayShift.X, bY + DisplayShift.Y - imageFileHeightOffset), Color.White);
-            }
-            /// draw (moving) units
-            foreach (Unit unitObject in gameMap.GetUnits())
-            {
-                int imageFileHeightOffset = (int)(imageGraphics[unitObject.name].Height - TileDimensions.Y);
-                (float x5, float y5) = coordinateConverter.MapToScreen(unitObject.Get_X(), unitObject.Get_Y());
-                spriteBatch.Draw(imageGraphics[unitObject.name], new Vector2(x5 + DisplayShift.X, y5 + DisplayShift.Y - imageFileHeightOffset), Color.White);
-            }
+                var imageFileHeightOffset = new Point(0, imageGraphics[entity.name].Height - TileDimensions.Y);
+                var te = coordinateConverter.MapToScreen(entity.Coordinates);
+                spriteBatch.Draw(imageGraphics[entity.name], (te + DisplayShift - imageFileHeightOffset).ToVector2(), Color.White);
+
+            };
+            gameMap.GetTerrain().ForEach(drawEntity);
+            gameMap.GetBuildings().ForEach(drawEntity);
+            gameMap.GetUnits().ForEach(drawEntity);
+
             if (DisplayScore)
             {
                 spriteBatch.Draw(score_widget, new Vector2(0, 0), Color.White);

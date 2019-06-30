@@ -9,7 +9,7 @@ namespace Omni.Buildings
 {
     class LumberCamp : Building
     {
-        public LumberCamp(Vector2 coordinates) : base(coordinates, "Lumber Camp")
+        public LumberCamp(Point coordinates) : base(coordinates, "Lumber Camp")
         {
         }
     }
