@@ -18,7 +18,7 @@ namespace Omni
 
         private CoordinateConverter coordinateConverter;
         private Pathfinder pathfinder;
-        private Dictionary<string, Texture2D> imageGraphics = new Dictionary<string, Texture2D>();
+        private readonly Dictionary<string, Texture2D> imageGraphics = new Dictionary<string, Texture2D>();
         private Texture2D grass_tile;
         private Texture2D laborer;
         private Texture2D tree;
@@ -278,9 +278,8 @@ namespace Omni
             /// draw the selected tile graphic if the selected tile is within the map bounds
             if (gameMap.IsPointInside(CursorMapPos))
             {
-                (float stx, float sty) = coordinateConverter.MapToScreen(CursorMapPos);
-                Vector2 selectedTilePosition = new Vector2(stx, sty);
-                spriteBatch.Draw(white_selection_box, new Vector2(selectedTilePosition.X + DisplayShift.X, selectedTilePosition.Y + DisplayShift.Y), Color.White);
+                var st = coordinateConverter.MapToScreen(CursorMapPos);
+                spriteBatch.Draw(white_selection_box, (st + DisplayShift).ToVector2(), Color.White);
             }
             if (DisplayPaths)
             {
@@ -290,35 +289,24 @@ namespace Omni
                     {
                         foreach (var pathStep in unitObject.GetPath())
                         {
-                            (float rbx, float rby) = coordinateConverter.MapToScreen(pathStep);
-                            spriteBatch.Draw(red_selection_box, new Vector2(rbx + DisplayShift.X, rby + DisplayShift.Y), Color.White);
+                            var rb = coordinateConverter.MapToScreen(pathStep);
+                            spriteBatch.Draw(red_selection_box, (rb + DisplayShift).ToVector2(), Color.White);
                         }
                     }
                 }
             }
 
-            /// draw the terrain objects next, resources, trees, rocks, etc
-            foreach (Terrain terrainObject in gameMap.GetTerrain())
+            Action<Entity> drawEntity = entity =>
             {
-                int imageFileHeightOffset = (int)(imageGraphics[terrainObject.name].Height - TileDimensions.Y);
-                (float teX, float teY) = coordinateConverter.MapToScreen(terrainObject.Coordinates);
-                spriteBatch.Draw(imageGraphics[terrainObject.name],
-                    new Vector2(teX + DisplayShift.X, teY + DisplayShift.Y - (imageFileHeightOffset)), Color.White);
-            }
-            /// draw buildings
-            foreach (Building buildingObject in gameMap.GetBuildings())
-            {
-                int imageFileHeightOffset = (int)(imageGraphics[buildingObject.name].Height - TileDimensions.Y);
-                (float bX, float bY) = coordinateConverter.MapToScreen(buildingObject.Coordinates);
-                spriteBatch.Draw(imageGraphics[buildingObject.name], new Vector2(bX + DisplayShift.X, bY + DisplayShift.Y - imageFileHeightOffset), Color.White);
-            }
-            /// draw (moving) units
-            foreach (Unit unitObject in gameMap.GetUnits())
-            {
-                int imageFileHeightOffset = (int)(imageGraphics[unitObject.name].Height - TileDimensions.Y);
-                (float x5, float y5) = coordinateConverter.MapToScreen(unitObject.Coordinates);
-                spriteBatch.Draw(imageGraphics[unitObject.name], new Vector2(x5 + DisplayShift.X, y5 + DisplayShift.Y - imageFileHeightOffset), Color.White);
-            }
+                var imageFileHeightOffset = new Point(0, imageGraphics[entity.name].Height - TileDimensions.Y);
+                var te = coordinateConverter.MapToScreen(entity.Coordinates);
+                spriteBatch.Draw(imageGraphics[entity.name], (te + DisplayShift - imageFileHeightOffset).ToVector2(), Color.White);
+
+            };
+            gameMap.GetTerrain().ForEach(drawEntity);
+            gameMap.GetBuildings().ForEach(drawEntity);
+            gameMap.GetUnits().ForEach(drawEntity);
+
             if (DisplayScore)
             {
                 spriteBatch.Draw(score_widget, new Vector2(0, 0), Color.White);
