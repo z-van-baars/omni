@@ -26,13 +26,17 @@ namespace Omni
         }
         public Point ScreenToMap(Point coordinates, Point displayShift)
         {
+            /// screen pixel coordinates to tile translation math - Don't fuck with this it works right now
+            /// still a bit squishy though
+            float background_center = tileDimensions.X / 2 + (displayShift.X + displayDimensions.X / 2);
+
             /// strips out the display shift camera offset
-            int xt = (coordinates.X - displayShift.X);
-            int yt = coordinates.Y - displayShift.Y;
+            float xt = (coordinates.X - displayShift.X) - (background_center - displayShift.X);
+            float yt = coordinates.Y - displayShift.Y;
 
             /// converts raw pixel coordinate data into canonical map coordinates
-            int column = ((xt / (tileDimensions.X / 2) + yt / (tileDimensions.Y / 2)) / 2);
-            int row = ((yt / (tileDimensions.Y / 2) - xt / (tileDimensions.X / 2)) / 2);
+            int column = (int)((xt / (tileDimensions.X / 2) + yt / (tileDimensions.Y / 2)) / 2);
+            int row = (int)((yt / (tileDimensions.Y / 2) - xt / (tileDimensions.X / 2)) / 2);
 
             return new Point(column, row);
         }
