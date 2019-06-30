@@ -4,50 +4,17 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
+using Priority_Queue;
 
 namespace Omni
 {
-    public class PriorityQueue<T>
+
+    class FastPoint : FastPriorityQueueNode
     {
-        // I'm using an unsorted array for this example, but ideally this
-        // would be a binary heap. There's an open issue for adding a binary
-        // heap to the standard C# library: https://github.com/dotnet/corefx/issues/574
-        //
-        // Until then, find a binary heap class:
-        // * https://github.com/BlueRaja/High-Speed-Priority-Queue-for-C-Sharp
-        // * http://visualstudiomagazine.com/articles/2012/11/01/priority-queues-with-c.aspx
-        // * http://xfleury.github.io/graphsearch.html
-        // * http://stackoverflow.com/questions/102398/priority-queue-in-net
-
-        private List<Tuple<T, double>> elements = new List<Tuple<T, double>>();
-
-        public int Count
-        {
-            get { return elements.Count; }
-        }
-
-        public void Enqueue(T item, double priority)
-        {
-            elements.Add(Tuple.Create(item, priority));
-        }
-
-        public T Dequeue()
-        {
-            int bestIndex = 0;
-
-            for (int i = 0; i < elements.Count; i++)
-            {
-                if (elements[i].Item2 < elements[bestIndex].Item2)
-                {
-                    bestIndex = i;
-                }
-            }
-
-            T bestItem = elements[bestIndex].Item1;
-            elements.RemoveAt(bestIndex);
-            return bestItem;
-        }
+        public Point P { get; set; }
+        public FastPoint(Point p) { P = p; }
     }
+
     class Pathfinder
     {
         private GameMap gameMap;
@@ -59,61 +26,69 @@ namespace Omni
             mapDimensions = gameMap.MapDimensions;
         }
 
-        private Point exploreFrontier(PriorityQueue<Point> frontier, Point target, Dictionary<Point, Point> cameFrom, Dictionary<Point, double> costSoFar)
+        private Point exploreFrontier(
+            FastPriorityQueue<FastPoint> frontier,
+            Point target,
+            Dictionary<Point, Point> cameFrom,
+            Dictionary<Point, float> costSoFar)
         {
-            var closestTile = new Point();
-            Point currentTile;
+            FastPoint closestTile = null;
+            FastPoint currentTile;
             double closestDistance = double.PositiveInfinity;
             while (frontier.Count > 0)
             {
                 currentTile = frontier.Dequeue();
-                double currentDistance = Math.Sqrt(Math.Abs(currentTile.X - target.X) + Math.Abs(currentTile.Y - target.Y));
+                double currentDistance = Math.Sqrt(
+                    Math.Abs(currentTile.P.X - target.X) +
+                    Math.Abs(currentTile.P.Y - target.Y));
                 if (currentDistance < closestDistance)
                 {
                     closestDistance = currentDistance;
                     closestTile = currentTile;
                 }
 
-                foreach (var neighborTile in gameMap.game_tiles[currentTile.Y, currentTile.X].NeighborsCoords)
+                foreach (var neighborTile in gameMap.game_tiles[currentTile.P.Y, currentTile.P.X].NeighborsCoords)
                 {
-                    GameTile tileObject = gameMap.game_tiles[(int)neighborTile.Y, (int)neighborTile.X];
+                    var tileObject = gameMap.game_tiles[neighborTile.Y, neighborTile.X];
                     if (tileObject.IsPathable())
                     {
-                        double tileModifier = 1.0;
-                        double distanceFromTarget = Math.Sqrt(Math.Abs(tileObject.Coordinates.X - target.X) + Math.Abs(tileObject.Coordinates.Y - target.Y));
-                        double newCost = (costSoFar[currentTile] + tileModifier) + distanceFromTarget;
-                        if (!cameFrom.ContainsKey(neighborTile) || newCost < costSoFar[currentTile])
+                        var tileModifier = 1.0f;
+                        var distanceFromTarget = (float)Math.Sqrt(
+                            Math.Abs(tileObject.Coordinates.X - target.X) +
+                            Math.Abs(tileObject.Coordinates.Y - target.Y));
+                        float newCost = (costSoFar[currentTile.P] + tileModifier) + distanceFromTarget;
+                        if (!cameFrom.ContainsKey(neighborTile) || newCost < costSoFar[currentTile.P])
                         {
-                            cameFrom[neighborTile] = currentTile;
+                            cameFrom[neighborTile] = currentTile.P;
                             costSoFar[neighborTile] = newCost;
-                            frontier.Enqueue(neighborTile, newCost);
+                            frontier.Enqueue(new FastPoint(neighborTile), newCost);
                         }
                     }
                 }
-                if (closestTile == target)
+                if (closestTile?.P == target)
                 {
                     break;
                 }
             }
-            return closestTile;
+            return closestTile.P;
         }
         public List<Point> GetPath(Point start, Point target)
         {
             var path = new List<Point>();
             var cameFrom = new Dictionary<Point, Point>();
-            var costSoFar = new Dictionary<Point, double>();
+            var costSoFar = new Dictionary<Point, float>();
             var closestTile = new Point();
             cameFrom[start] = start;
-            costSoFar[start] = 0;
-            var frontier = new PriorityQueue<Point>();
+            costSoFar[start] = 0f;
+            var frontier = new FastPriorityQueue<FastPoint>(1000);
             var neighbors = gameMap.game_tiles[start.Y, start.X].NeighborsCoords;
-            frontier.Enqueue(start, 0);
+            frontier.Enqueue(new FastPoint(start), 0);
             foreach (var tile in neighbors)
             {
                 var tileObject = gameMap.game_tiles[tile.Y, tile.X];
                 if (tileObject.IsPathable())
                 {
-                    frontier.Enqueue(tile, 0);
+                    frontier.Enqueue(new FastPoint(tile), 0);
                 }
 
             }
