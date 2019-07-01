@@ -28,10 +28,10 @@ namespace Omni
         {
             /// screen pixel coordinates to tile translation math - Don't fuck with this it works right now
             /// still a bit squishy though
-            float background_center = tileDimensions.X / 2 + (displayShift.X + displayDimensions.X / 2);
+            // float background_center = tileDimensions.X / 2 + (displayShift.X + displayDimensions.X / 2);
 
             /// strips out the display shift camera offset
-            float xt = (coordinates.X - displayShift.X) - (background_center - displayShift.X);
+            float xt = (coordinates.X - displayShift.X) + (tileDimensions.X / 2);
             float yt = coordinates.Y - displayShift.Y;
 
             /// converts raw pixel coordinate data into canonical map coordinates
